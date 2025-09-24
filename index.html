@@ -13,20 +13,20 @@ body, html {
   background: #121212;
   color: white;
   font-family: sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  /* 縦中央寄せを削除 */
+  display: block;
 }
 
 .player-wrapper {
   text-align: center;
+  margin: 2rem auto 0; /* 上から余白、横中央寄せ */
+  max-width: 600px;
 }
 
 /* プレイヤー */
 .video-container {
   position: relative;
-  width: 90vw;
-  max-width: 600px;
+  width: 100%;
   padding-top: 56.25%; /* 16:9比率 */
   margin: 0 auto;
 }
@@ -72,28 +72,14 @@ button:hover {
   background: #1ed760;
 }
 
-/* プレイリスト切替 */
-.playlist-selector {
-  margin-top: 1.5rem;
-}
-select {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: none;
-  font-size: 1rem;
-}
-
 /* プレイリスト表示 */
 .playlist-list {
   margin-top: 2rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 100%;
   text-align: left;
-
-  max-height: 200px;   /* スクロール領域の高さを固定 */
-  overflow-y: auto;    /* 縦スクロール有効化 */
-  padding-right: 5px;  /* スクロールバーが出ても見切れないように */
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 .playlist-item {
   display: flex;
@@ -142,12 +128,6 @@ select {
     <button id="nextBtn">⏭ 次へ</button>
   </div>
 
-  <!-- プレイリスト選択 -->
-  <div class="playlist-selector">
-    <label for="playlistSelect">プレイリスト切替：</label>
-    <select id="playlistSelect"></select>
-  </div>
-
   <div class="playlist-list" id="playlistList"></div>
 
 </div>
@@ -163,39 +143,15 @@ fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
-
-    // セレクトボックスにプレイリスト追加
-    const select = document.getElementById('playlistSelect');
-    Object.entries(playlists).forEach(([key, pl]) => {
-      const option = document.createElement('option');
-      option.value = key;
-      option.textContent = pl.label || key;
-      select.appendChild(option);
-    });
-
-    // 最初のプレイリストをセット
     const firstKey = Object.keys(playlists)[0];
-    switchPlaylist(firstKey);
-
-    // 切替イベント
-    select.addEventListener('change', e => {
-      switchPlaylist(e.target.value);
-    });
+    currentPlaylist = playlists[firstKey].videos;
+    loadVideo(currentIndex);
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-// プレイリスト切替処理
-function switchPlaylist(key) {
-  currentPlaylist = playlists[key].videos;
-  currentIndex = 0;
-  loadVideo(currentIndex);
-}
-
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  if (currentPlaylist.length > 0) {
-    loadVideo(currentIndex);
-  }
+  loadVideo(currentIndex);
 }
 
 // 動画ロード + タイトル更新 + プレイリストハイライト
@@ -235,7 +191,7 @@ function prevVideo() {
 document.getElementById('prevBtn').addEventListener('click', prevVideo);
 document.getElementById('nextBtn').addEventListener('click', nextVideo);
 
-// プレイリストリストレンダリング
+// プレイリストレンダリング
 function renderPlaylistList() {
   const container = document.getElementById('playlistList');
   container.innerHTML = '';
