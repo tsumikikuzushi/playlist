@@ -1,0 +1,14 @@
+{
+  "playlist1": {
+    "label": "リスト1 - 好きなゲームBGM",
+    "videos": [
+      { "videoId": "GgZI8ARPkuA", 
+        "start": 2056, 
+        "end": 2152, 
+        "gametitle": "CharadeManiacs", 
+        "musictitle": "KANAU", 
+        "thumbnail": "http://img.youtube.com/vi/GgZI8ARPkuA/maxresdefault.jpg" 
+      }
+    ]
+  }
+}
