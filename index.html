@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>音楽プレイヤー</title>
+<title>YouTubeプレイヤー</title>
 <script src="https://www.youtube.com/iframe_api"></script>
 <style>
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: #121212; /* Spotify風暗め背景 */
+  background: #121212;
   color: white;
   font-family: sans-serif;
   display: flex;
@@ -37,15 +37,16 @@ body, html {
   height: 100%;
 }
 
-/* タイトル表示 */
+/* タイトル表示（逆順） */
 .title-container {
   margin-top: 1rem;
 }
-.title-container .gameTitle {
+.title-container .musicTitle {
   font-size: 1.4rem;
   font-weight: bold;
+  color: white;
 }
-.title-container .musicTitle {
+.title-container .gameTitle {
   font-size: 1.1rem;
   color: #aaa;
   margin-top: 0.2rem;
@@ -61,7 +62,7 @@ button {
   font-size: 1rem;
   border: none;
   border-radius: 6px;
-  background: #1db954; /* Spotifyグリーン */
+  background: #1db954;
   color: white;
   cursor: pointer;
   transition: background 0.2s;
@@ -69,24 +70,64 @@ button {
 button:hover {
   background: #1ed760;
 }
+
+/* プレイリスト表示 */
+.playlist-list {
+  margin-top: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+.playlist-item {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.playlist-item.selected {
+  background-color: #1db95433;
+}
+.playlist-item img {
+  width: 50px;
+  height: 50px;
+  margin-right: 0.5rem;
+}
+.playlist-item .titles {
+  display: flex;
+  flex-direction: column;
+}
+.playlist-item .titles .musicTitle {
+  font-weight: bold;
+  color: white;
+}
+.playlist-item .titles .gameTitle {
+  font-size: 0.9rem;
+  color: #aaa;
+}
 </style>
 </head>
 <body>
 
 <div class="player-wrapper">
+
   <div class="video-container">
     <div id="player"></div>
   </div>
 
   <div class="title-container">
-    <div class="gameTitle" id="gameTitle"></div>
     <div class="musicTitle" id="musicTitle"></div>
+    <div class="gameTitle" id="gameTitle"></div>
   </div>
 
   <div class="controls">
-    <button id="prevBtn"> ⏮ </button>
-    <button id="nextBtn"> ⏭ </button>
+    <button id="prevBtn">⏮ 前へ</button>
+    <button id="nextBtn">⏭ 次へ</button>
   </div>
+
+  <div class="playlist-list" id="playlistList"></div>
+
 </div>
 
 <script>
@@ -111,25 +152,24 @@ function onYouTubeIframeAPIReady() {
   loadVideo(currentIndex);
 }
 
-// 動画ロード + タイトル更新
+// 動画ロード + タイトル更新 + プレイリストハイライト
 function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
-  const start = video.start ?? 0;
-  const end = video.end ?? undefined;
-
-  document.getElementById('gameTitle').textContent = video.gameTitle;
   document.getElementById('musicTitle').textContent = video.musicTitle;
+  document.getElementById('gameTitle').textContent = video.gameTitle;
 
   if (player) {
-    player.loadVideoById({ videoId: video.videoId, startSeconds: start, endSeconds: end });
+    player.loadVideoById({ videoId: video.videoId, startSeconds: video.start ?? 0, endSeconds: video.end ?? undefined });
   } else {
     player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { start: start, end: end, autoplay: 0, controls: 1 }
+      playerVars: { autoplay: 0, controls: 1 }
     });
   }
+
+  renderPlaylistList();
 }
 
 // 前/次ボタン
@@ -148,6 +188,26 @@ function prevVideo() {
 
 document.getElementById('prevBtn').addEventListener('click', prevVideo);
 document.getElementById('nextBtn').addEventListener('click', nextVideo);
+
+// プレイリストリストレンダリング
+function renderPlaylistList() {
+  const container = document.getElementById('playlistList');
+  container.innerHTML = '';
+  currentPlaylist.forEach((video, idx) => {
+    const item = document.createElement('div');
+    item.className = 'playlist-item' + (idx === currentIndex ? ' selected' : '');
+    item.innerHTML = `<img src="${video.thumbnail}" alt="${video.musicTitle}">
+                      <div class="titles">
+                        <div class="musicTitle">${video.musicTitle}</div>
+                        <div class="gameTitle">${video.gameTitle}</div>
+                      </div>`;
+    item.addEventListener('click', () => {
+      currentIndex = idx;
+      loadVideo(currentIndex);
+    });
+    container.appendChild(item);
+  });
+}
 </script>
 
 </body>
