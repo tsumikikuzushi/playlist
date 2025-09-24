@@ -9,16 +9,15 @@
 body, html {
   margin: 0;
   padding: 0;
-  height: 100%;
   background: #121212;
   color: white;
   font-family: sans-serif;
 }
 
-/* プレイヤー全体 */
+/* プレイヤー中央寄せ */
 .player-wrapper {
   max-width: 600px;
-  margin: 0 auto; /* 横方向中央 */
+  margin: 0 auto;
   padding: 1rem;
   text-align: center;
 }
@@ -28,6 +27,7 @@ body, html {
   position: relative;
   width: 100%;
   padding-top: 56.25%; /* 16:9比率 */
+  margin: 0 auto;
 }
 #player {
   position: absolute;
@@ -52,30 +52,10 @@ body, html {
   margin-top: 0.2rem;
 }
 
-/* コントロールボタン */
-.controls {
-  margin-top: 1.8rem;
-}
-button {
-  padding: 0.7rem 1.5rem;
-  margin: 0 0.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  background: #1db954;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-button:hover {
-  background: #1ed760;
-}
-
 /* プレイリスト切替 */
 .playlist-selector {
   margin-top: 1.5rem;
   text-align: center;
-  color: white; /* ラベル文字色 */
   font-size: 1rem;
 }
 .playlist-selector label {
@@ -93,7 +73,7 @@ button:hover {
 
 /* プレイリスト表示 */
 .playlist-list {
-  margin-top: 1rem;
+  margin-top: 2rem;
   max-height: 200px;   /* スクロール領域の高さ */
   overflow-y: auto;    /* 縦スクロール有効化 */
   padding-right: 5px;
@@ -141,18 +121,12 @@ button:hover {
     <div class="gameTitle" id="gameTitle"></div>
   </div>
 
-  <div class="controls">
-    <button id="prevBtn"> ⏮ </button>
-    <button id="nextBtn"> ⏭ </button>
-  </div>
-
   <!-- プレイリスト切替セレクター -->
   <div class="playlist-selector">
-  　<label for="playlistSelect">プレイリスト切替：</label>
-  　<select id="playlistSelect"></select>
-　</div>
+    <label for="playlistSelect">プレイリスト切替：</label>
+    <select id="playlistSelect"></select>
+  </div>
 
-  <!-- プレイリストリスト -->
   <div class="playlist-list" id="playlistList"></div>
 
 </div>
@@ -168,29 +142,30 @@ fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
-    const playlistKeys = Object.keys(playlists);
+
+    // セレクトボックスに追加
     const select = document.getElementById('playlistSelect');
-
-    // セレクトにプレイリスト追加
-    playlistKeys.forEach((key) => {
-      const opt = document.createElement('option');
-      opt.value = key;
-      opt.textContent = playlists[key].label ?? key;
-      select.appendChild(opt);
+    Object.keys(playlists).forEach(key => {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = playlists[key].label;
+      select.appendChild(option);
     });
 
-    // 最初のプレイリストを読み込み
-    currentPlaylist = playlists[playlistKeys[0]].videos;
+    // 初期プレイリスト設定
+    const firstKey = Object.keys(playlists)[0];
+    currentPlaylist = playlists[firstKey].videos;
     loadVideo(currentIndex);
-
-    // セレクト変更でプレイリスト切替
-    select.addEventListener('change', (e) => {
-      currentIndex = 0;
-      currentPlaylist = playlists[e.target.value].videos;
-      loadVideo(currentIndex);
-    });
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
+
+// プレイリスト切替時
+document.getElementById('playlistSelect').addEventListener('change', e => {
+  const key = e.target.value;
+  currentPlaylist = playlists[key].videos;
+  currentIndex = 0;
+  loadVideo(currentIndex);
+});
 
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
@@ -216,23 +191,6 @@ function loadVideo(index) {
 
   renderPlaylistList();
 }
-
-// 前/次ボタン
-function nextVideo() {
-  if (currentIndex < currentPlaylist.length - 1) {
-    currentIndex++;
-    loadVideo(currentIndex);
-  }
-}
-function prevVideo() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    loadVideo(currentIndex);
-  }
-}
-
-document.getElementById('prevBtn').addEventListener('click', prevVideo);
-document.getElementById('nextBtn').addEventListener('click', nextVideo);
 
 // プレイリストリストレンダリング
 function renderPlaylistList() {
