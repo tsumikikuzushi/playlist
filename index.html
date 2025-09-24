@@ -72,6 +72,17 @@ button:hover {
   background: #1ed760;
 }
 
+/* プレイリスト切替 */
+.playlist-selector {
+  margin-top: 1.5rem;
+}
+select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+}
+
 /* プレイリスト表示 */
 .playlist-list {
   margin-top: 2rem;
@@ -131,6 +142,12 @@ button:hover {
     <button id="nextBtn">⏭ 次へ</button>
   </div>
 
+  <!-- プレイリスト選択 -->
+  <div class="playlist-selector">
+    <label for="playlistSelect">プレイリスト切替：</label>
+    <select id="playlistSelect"></select>
+  </div>
+
   <div class="playlist-list" id="playlistList"></div>
 
 </div>
@@ -146,15 +163,39 @@ fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
+
+    // セレクトボックスにプレイリスト追加
+    const select = document.getElementById('playlistSelect');
+    Object.entries(playlists).forEach(([key, pl]) => {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = pl.label || key;
+      select.appendChild(option);
+    });
+
+    // 最初のプレイリストをセット
     const firstKey = Object.keys(playlists)[0];
-    currentPlaylist = playlists[firstKey].videos;
-    loadVideo(currentIndex);
+    switchPlaylist(firstKey);
+
+    // 切替イベント
+    select.addEventListener('change', e => {
+      switchPlaylist(e.target.value);
+    });
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
+// プレイリスト切替処理
+function switchPlaylist(key) {
+  currentPlaylist = playlists[key].videos;
+  currentIndex = 0;
+  loadVideo(currentIndex);
+}
+
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  loadVideo(currentIndex);
+  if (currentPlaylist.length > 0) {
+    loadVideo(currentIndex);
+  }
 }
 
 // 動画ロード + タイトル更新 + プレイリストハイライト
