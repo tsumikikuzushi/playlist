@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サムネイル付きJSON再生リスト</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <style>
+    body { font-family: sans-serif; margin:1rem; text-align:center; background:#f9f9f9; }
+    h2 { margin-bottom:1rem; }
+    .video-container { position:relative; width:100%; max-width:800px; margin:0 auto; padding-top:56.25%; }
+    #player { position:absolute; top:0; left:0; width:100%; height:100%; }
+    .controls, .list-select { margin-top:1rem; }
+    button { padding:0.5rem 1rem; margin:0.3rem; border:none; border-radius:6px; background:#007bff; color:white; cursor:pointer; }
+    .thumbnail-container { display:flex; flex-wrap:wrap; justify-content:center; margin-top:1rem; }
+    .thumbnail { display:inline-block; margin:0.3rem; cursor:pointer; border:2px solid transparent; }
+    .thumbnail.selected { border-color:#007bff; }
+    .thumbnail img { width:120px; height:68px; display:block; }
+    .thumbnail span { display:block; font-size:0.9rem; margin-top:0.2rem; max-width:120px; word-wrap:break-word; }
+  </style>
+</head>
+<body>
+  <h2>📺 サムネイル付きJSON再生リスト</h2>
+
+  <div class="list-select" id="listSelectContainer"></div>
+
+  <div class="video-container">
+    <div id="player"></div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn">⏮ 前へ</button>
+    <button id="nextBtn">⏭ 次へ</button>
+  </div>
+
+  <script>
+    let playlists = {};
+    let currentPlaylist = [];
+    let currentIndex = 0;
+    let player;
+
+    // JSON読み込み
+    fetch('playlists.json')
+      .then(res => res.json())
+      .then(data => {
+        playlists = data;
+        const container = document.getElementById('listSelectContainer');
+
+        // サムネイル生成
+        Object.keys(playlists).forEach(key => {
+          const pl = playlists[key];
+          pl.videos.forEach((video, vIdx) => {
+            const div = document.createElement('div');
+            div.className = 'thumbnail';
+            div.dataset.playlist = key;
+            div.dataset.index = vIdx;
+            div.innerHTML = `<img src="${video.thumbnail}" alt="${video.title}"><span>${video.title}</span>`;
+            div.addEventListener('click', () => {
+              currentPlaylist = pl.videos;
+              currentIndex = vIdx;
+              loadVideo(currentIndex);
+              updateSelectedThumbnail(container, div);
+            });
+            container.appendChild(div);
+          });
+        });
+      })
+      .catch(err => console.error('JSON読み込みエラー:', err));
+
+    function updateSelectedThumbnail(container, selectedDiv) {
+      Array.from(container.children).forEach(div => div.classList.remove('selected'));
+      selectedDiv.classList.add('selected');
+    }
+
+    // YouTube API準備完了
+    function onYouTubeIframeAPIReady() {
+      if (currentPlaylist.length > 0) loadVideo(currentIndex);
+    }
+
+    function loadVideo(index) {
+      const video = currentPlaylist[index];
+      if (!video) return;
+
+      if (player) {
+        player.loadVideoById({
+          videoId: video.videoId,
+          startSeconds: video.start,
+          endSeconds: video.end
+        });
+      } else {
+        player = new YT.Player("player", {
+          videoId: video.videoId,
+          playerVars: { start: video.start, end: video.end, autoplay:0, controls:1 }
+        });
+      }
+    }
+
+    function nextVideo() {
+      if (currentIndex < currentPlaylist.length - 1) {
+        currentIndex++;
+        loadVideo(currentIndex);
+      }
+    }
+
+    function prevVideo() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadVideo(currentIndex);
+      }
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", prevVideo);
+    document.getElementById("nextBtn").addEventListener("click", nextVideo);
+  </script>
+</body>
+</html>
