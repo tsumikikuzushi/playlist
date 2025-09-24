@@ -3,53 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>音声再生リストプレイヤー</title>
+<title>音楽プレイヤー</title>
 <script src="https://www.youtube.com/iframe_api"></script>
 <style>
-body { font-family:sans-serif; margin:1rem; text-align:center; background:#f9f9f9; }
-h2 { margin-bottom:1rem; }
-
-/* サムネイル縦並び */
-.thumbnail-container { 
-  display:flex; 
-  flex-direction: column; /* 縦並び */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #121212; /* Spotify風暗め背景 */
+  color: white;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  margin-top:1.5rem; 
-}
-.thumbnail { 
-  display:flex; 
-  flex-direction: column;
-  align-items: center;
-  margin:0.5rem; 
-  cursor:pointer; 
-  border:2px solid transparent; 
-}
-.thumbnail.selected { border-color:#007bff; }
-.thumbnail img { width:160px; height:90px; display:block; }
-.thumbnail span { 
-  display:block; 
-  font-size:1rem; 
-  margin-top:0.2rem; 
-  max-width:160px; 
-  word-wrap:break-word; 
 }
 
-/* YouTube iframe 非表示 */
+.player-wrapper {
+  text-align: center;
+}
+
+/* プレイヤー */
+.video-container {
+  position: relative;
+  width: 90vw;
+  max-width: 600px;
+  padding-top: 56.25%; /* 16:9比率 */
+}
 #player {
-  width:0;
-  height:0;
-  position:absolute;
-  left:-9999px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* タイトル表示 */
+.title-container {
+  margin-top: 1rem;
+}
+.title-container .gameTitle {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+.title-container .musicTitle {
+  font-size: 1.1rem;
+  color: #aaa;
+  margin-top: 0.2rem;
+}
+
+/* コントロールボタン */
+.controls {
+  margin-top: 1.8rem;
+}
+button {
+  padding: 0.7rem 1.5rem;
+  margin: 0 0.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #1db954; /* Spotifyグリーン */
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+button:hover {
+  background: #1ed760;
 }
 </style>
 </head>
 <body>
 
-<h2>🔊 音声再生リストプレイヤー</h2>
-<div class="list-select" id="listSelectContainer"></div>
+<div class="player-wrapper">
+  <div class="video-container">
+    <div id="player"></div>
+  </div>
 
-<!-- iframe非表示 -->
-<div id="player"></div>
+  <div class="title-container">
+    <div class="gameTitle" id="gameTitle"></div>
+    <div class="musicTitle" id="musicTitle"></div>
+  </div>
+
+  <div class="controls">
+    <button id="prevBtn"> ⏮ </button>
+    <button id="nextBtn"> ⏭ </button>
+  </div>
+</div>
 
 <script>
 let playlists = {};
@@ -62,40 +100,18 @@ fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
-    const container = document.getElementById('listSelectContainer');
-
-    Object.keys(playlists).forEach(key => {
-      const pl = playlists[key];
-      pl.videos.forEach((video, vIdx) => {
-        const div = document.createElement('div');
-        div.className = 'thumbnail';
-        div.dataset.playlist = key;
-        div.dataset.index = vIdx;
-        div.innerHTML = `<img src="${video.thumbnail}" alt="${video.gameTitle}">
-                         <span>${video.gameTitle}<br>${video.musicTitle}</span>`;
-        div.addEventListener('click', () => {
-          currentPlaylist = pl.videos;
-          currentIndex = vIdx;
-          loadVideo(currentIndex);
-          updateSelectedThumbnail(container, div);
-        });
-        container.appendChild(div);
-      });
-    });
+    const firstKey = Object.keys(playlists)[0];
+    currentPlaylist = playlists[firstKey].videos;
+    loadVideo(currentIndex);
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-function updateSelectedThumbnail(container, selectedDiv) {
-  Array.from(container.children).forEach(div => div.classList.remove('selected'));
-  selectedDiv.classList.add('selected');
-}
-
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  if (currentPlaylist.length > 0) loadVideo(currentIndex);
+  loadVideo(currentIndex);
 }
 
-// 動画ロード（音声のみ再生）
+// 動画ロード + タイトル更新
 function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
@@ -103,15 +119,35 @@ function loadVideo(index) {
   const start = video.start ?? 0;
   const end = video.end ?? undefined;
 
+  document.getElementById('gameTitle').textContent = video.gameTitle;
+  document.getElementById('musicTitle').textContent = video.musicTitle;
+
   if (player) {
     player.loadVideoById({ videoId: video.videoId, startSeconds: start, endSeconds: end });
   } else {
-    player = new YT.Player("player", {
+    player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { start: start, end: end, autoplay:0, controls:0 }
+      playerVars: { start: start, end: end, autoplay: 0, controls: 1 }
     });
   }
 }
+
+// 前/次ボタン
+function nextVideo() {
+  if (currentIndex < currentPlaylist.length - 1) {
+    currentIndex++;
+    loadVideo(currentIndex);
+  }
+}
+function prevVideo() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    loadVideo(currentIndex);
+  }
+}
+
+document.getElementById('prevBtn').addEventListener('click', prevVideo);
+document.getElementById('nextBtn').addEventListener('click', nextVideo);
 </script>
 
 </body>
