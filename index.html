@@ -1,216 +1,174 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>私選ゲームBGMプレイヤー</title>
-<script src="https://www.youtube.com/iframe_api"></script>
-<style>
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: #121212;
-  color: white;
-  font-family: sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.player-wrapper {
-  text-align: center;
-}
-
-/* プレイヤー */
-.video-container {
-  position: relative;
-  width: 90vw;
-  max-width: 600px;
-  padding-top: 56.25%; /* 16:9比率 */
-  margin: 0 auto;       /* 親コンテナ内で中央寄せ */
-}
-#player {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: block;       /* 幅100%確実に適用 */
-}
-
-/* タイトル表示（逆順） */
-.title-container {
-  margin-top: 1rem;
-}
-.title-container .musicTitle {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: white;
-}
-.title-container .gameTitle {
-  font-size: 1.1rem;
-  color: #aaa;
-  margin-top: 0.2rem;
-}
-
-/* コントロールボタン */
-.controls {
-  margin-top: 1.8rem;
-}
-button {
-  padding: 0.7rem 1.5rem;
-  margin: 0 0.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  background: #1db954;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-button:hover {
-  background: #1ed760;
-}
-
-/* プレイリスト表示 */
-.playlist-list {
-  margin-top: 2rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: left;
-}
-.playlist-item {
-  display: flex;
-  align-items: center;
-  padding: 0.3rem;
-  cursor: pointer;
-  border-radius: 6px;
-}
-.playlist-item.selected {
-  background-color: #1db95433;
-}
-.playlist-item img {
-  width: 50px;
-  height: 50px;
-  margin-right: 0.5rem;
-}
-.playlist-item .titles {
-  display: flex;
-  flex-direction: column;
-}
-.playlist-item .titles .musicTitle {
-  font-weight: bold;
-  color: white;
-}
-.playlist-item .titles .gameTitle {
-  font-size: 0.9rem;
-  color: #aaa;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>私選ゲームBGM Player</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 225px;
+      border: none;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+    }
+    .title {
+      margin: 1rem 0 0.3rem 0;
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: white;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 1rem;
+    }
+    .controls {
+      margin: 1rem 0;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      margin: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .track-list-container {
+      max-height: 250px; /* スクロール領域の高さ制限 */
+      overflow-y: auto;
+      margin-top: 1rem;
+      border-top: 1px solid #333;
+      padding-top: 0.5rem;
+    }
+    .track-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .track-list li {
+      display: flex;
+      align-items: center;
+      padding: 0.4rem;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .track-list li:hover {
+      background: #1e1e1e;
+    }
+    .track-list img {
+      width: 50px;
+      height: 50px;
+      margin-right: 0.6rem;
+      border-radius: 4px;
+    }
+    .track-info {
+      text-align: left;
+    }
+    .track-info .music {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: white;
+    }
+    .track-info .game {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+    .track-list li.active {
+      background: #007bff33;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <iframe id="player" allow="autoplay"></iframe>
+    <div id="musicTitle" class="title"></div>
+    <div id="gameTitle" class="subtitle"></div>
+    <div class="controls">
+      <button id="prevBtn">⏮ 前へ</button>
+      <button id="nextBtn">⏭ 次へ</button>
+    </div>
 
-<div class="player-wrapper">
-
-  <div class="video-container">
-    <div id="player"></div>
+    <div class="track-list-container">
+      <ul class="track-list" id="trackList"></ul>
+    </div>
   </div>
 
-  <div class="title-container">
-    <div class="musicTitle" id="musicTitle"></div>
-    <div class="gameTitle" id="gameTitle"></div>
-  </div>
+  <script>
+    let videos = [];
+    let currentIndex = 0;
 
-  <div class="controls">
-    <button id="prevBtn"> ⏮ </button>
-    <button id="nextBtn"> ⏭ </button>
-  </div>
+    const player = document.getElementById("player");
+    const musicTitle = document.getElementById("musicTitle");
+    const gameTitle = document.getElementById("gameTitle");
+    const trackList = document.getElementById("trackList");
 
-  <div class="playlist-list" id="playlistList"></div>
+    function loadVideo(index) {
+      const video = videos[index];
+      player.src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1`;
+      musicTitle.textContent = video.musicTitle;
+      gameTitle.textContent = video.gameTitle;
 
-</div>
+      document.querySelectorAll(".track-list li").forEach((li, i) => {
+        li.classList.toggle("active", i === index);
+      });
+    }
 
-<script>
-let playlists = {};
-let currentPlaylist = [];
-let currentIndex = 0;
-let player;
+    function renderList() {
+      trackList.innerHTML = "";
+      videos.forEach((video, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${video.thumbnail}" alt="">
+          <div class="track-info">
+            <div class="music">${video.musicTitle}</div>
+            <div class="game">${video.gameTitle}</div>
+          </div>
+        `;
+        li.addEventListener("click", () => {
+          currentIndex = i;
+          loadVideo(currentIndex);
+        });
+        trackList.appendChild(li);
+      });
+    }
 
-// JSON読み込み
-fetch('playlists.json')
-  .then(res => res.json())
-  .then(data => {
-    playlists = data;
-    const firstKey = Object.keys(playlists)[0];
-    currentPlaylist = playlists[firstKey].videos;
-    loadVideo(currentIndex);
-  })
-  .catch(err => console.error('JSON読み込みエラー:', err));
-
-// YouTube API準備完了
-function onYouTubeIframeAPIReady() {
-  loadVideo(currentIndex);
-}
-
-// 動画ロード + タイトル更新 + プレイリストハイライト
-function loadVideo(index) {
-  const video = currentPlaylist[index];
-  if (!video) return;
-
-  document.getElementById('musicTitle').textContent = video.musicTitle;
-  document.getElementById('gameTitle').textContent = video.gameTitle;
-
-  if (player) {
-    player.loadVideoById({ videoId: video.videoId, startSeconds: video.start ?? 0, endSeconds: video.end ?? undefined });
-  } else {
-    player = new YT.Player('player', {
-      videoId: video.videoId,
-      playerVars: { autoplay: 0, controls: 1 }
-    });
-  }
-
-  renderPlaylistList();
-}
-
-// 前/次ボタン
-function nextVideo() {
-  if (currentIndex < currentPlaylist.length - 1) {
-    currentIndex++;
-    loadVideo(currentIndex);
-  }
-}
-function prevVideo() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    loadVideo(currentIndex);
-  }
-}
-
-document.getElementById('prevBtn').addEventListener('click', prevVideo);
-document.getElementById('nextBtn').addEventListener('click', nextVideo);
-
-// プレイリストリストレンダリング
-function renderPlaylistList() {
-  const container = document.getElementById('playlistList');
-  container.innerHTML = '';
-  currentPlaylist.forEach((video, idx) => {
-    const item = document.createElement('div');
-    item.className = 'playlist-item' + (idx === currentIndex ? ' selected' : '');
-    item.innerHTML = `<img src="${video.thumbnail}" alt="${video.musicTitle}">
-                      <div class="titles">
-                        <div class="musicTitle">${video.musicTitle}</div>
-                        <div class="gameTitle">${video.gameTitle}</div>
-                      </div>`;
-    item.addEventListener('click', () => {
-      currentIndex = idx;
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + videos.length) % videos.length;
       loadVideo(currentIndex);
     });
-    container.appendChild(item);
-  });
-}
-</script>
 
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % videos.length;
+      loadVideo(currentIndex);
+    });
+
+    // 外部 JSON 読み込み
+    fetch("playlists.json")
+      .then(res => res.json())
+      .then(data => {
+        videos = data.playlist1; // JSON内のキーを指定
+        renderList();
+        loadVideo(currentIndex);
+      })
+      .catch(err => console.error("JSON読み込みエラー:", err));
+  </script>
 </body>
 </html>
