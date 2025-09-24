@@ -13,13 +13,14 @@ body, html {
   background: #121212;
   color: white;
   font-family: sans-serif;
-  display: block; /* 縦上寄せ */
 }
 
+/* プレイヤー全体 */
 .player-wrapper {
-  text-align: center;
-  margin: 2rem auto 0; /* 上から余白、横中央寄せ */
   max-width: 600px;
+  margin: 0 auto; /* 横方向中央 */
+  padding: 1rem;
+  text-align: center;
 }
 
 /* プレイヤー */
@@ -27,7 +28,6 @@ body, html {
   position: relative;
   width: 100%;
   padding-top: 56.25%; /* 16:9比率 */
-  margin: 0 auto;
 }
 #player {
   position: absolute;
@@ -71,23 +71,28 @@ button:hover {
   background: #1ed760;
 }
 
-/* プレイリスト選択 */
-#playlistSelect {
-  margin-bottom: 1rem;
+/* プレイリスト切替 */
+.playlist-selector {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+.playlist-selector select {
   padding: 0.5rem;
-  font-size: 1rem;
   border-radius: 6px;
   border: none;
+  font-size: 1rem;
+  background: #222;
+  color: white;
+  cursor: pointer;
 }
 
 /* プレイリスト表示 */
 .playlist-list {
-  margin-top: 2rem;
-  max-width: 100%;
-  text-align: left;
-  max-height: 200px;
-  overflow-y: auto;
+  margin-top: 1rem;
+  max-height: 200px;   /* スクロール領域の高さ */
+  overflow-y: auto;    /* 縦スクロール有効化 */
   padding-right: 5px;
+  text-align: left;
 }
 .playlist-item {
   display: flex;
@@ -122,9 +127,6 @@ button:hover {
 
 <div class="player-wrapper">
 
-  <!-- プレイリスト切替セレクト -->
-  <select id="playlistSelect"></select>
-
   <div class="video-container">
     <div id="player"></div>
   </div>
@@ -135,10 +137,16 @@ button:hover {
   </div>
 
   <div class="controls">
-    <button id="prevBtn">⏮ 前へ</button>
-    <button id="nextBtn">⏭ 次へ</button>
+    <button id="prevBtn"> ⏮ </button>
+    <button id="nextBtn"> ⏭ </button>
   </div>
 
+  <!-- プレイリスト切替セレクター -->
+  <div class="playlist-selector">
+    <select id="playlistSelect"></select>
+  </div>
+
+  <!-- プレイリストリスト -->
   <div class="playlist-list" id="playlistList"></div>
 
 </div>
@@ -158,7 +166,7 @@ fetch('playlists.json')
     const select = document.getElementById('playlistSelect');
 
     // セレクトにプレイリスト追加
-    playlistKeys.forEach((key, idx) => {
+    playlistKeys.forEach((key) => {
       const opt = document.createElement('option');
       opt.value = key;
       opt.textContent = playlists[key].label ?? key;
@@ -220,7 +228,7 @@ function prevVideo() {
 document.getElementById('prevBtn').addEventListener('click', prevVideo);
 document.getElementById('nextBtn').addEventListener('click', nextVideo);
 
-// プレイリストレンダリング
+// プレイリストリストレンダリング
 function renderPlaylistList() {
   const container = document.getElementById('playlistList');
   container.innerHTML = '';
