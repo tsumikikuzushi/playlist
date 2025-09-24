@@ -59,5 +59,15 @@
         "thumbnail": "http://img.youtube.com/vi/TUA19CxR0qQ/default.jpg" 
       }
     ]
+  }, 
+  "playlist2": {
+    "label": "リスト2 - 仮置き",
+    "videos": [
+      { "videoId": "tvueTeA5np0", 
+        "gameTitle": "くりきん ナノアイランドストーリー", 
+        "musicTitle": "VS.四天王", 
+        "thumbnail": "http://img.youtube.com/vi/tvueTeA5np0/default.jpg" 
+      }
+    ]
   }
 }
