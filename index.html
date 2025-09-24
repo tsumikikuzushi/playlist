@@ -3,25 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>サムネイル付き再生リストプレイヤー</title>
+<title>再生リストプレイヤー</title>
 <script src="https://www.youtube.com/iframe_api"></script>
 <style>
 body { font-family:sans-serif; margin:1rem; text-align:center; background:#f9f9f9; }
 h2 { margin-bottom:1rem; }
-.video-container { position:relative; width:100%; max-width:800px; margin:0 auto; padding-top:56.25%; }
+.video-container { position:relative; width:100%; max-width:900px; margin:0 auto; padding-top:56.25%; }
 #player { position:absolute; top:0; left:0; width:100%; height:100%; }
-.controls, .list-select { margin-top:1rem; }
-button { padding:0.5rem 1rem; margin:0.3rem; border:none; border-radius:6px; background:#007bff; color:white; cursor:pointer; }
-.thumbnail-container { display:flex; flex-wrap:wrap; justify-content:center; margin-top:1rem; }
-.thumbnail { display:inline-block; margin:0.3rem; cursor:pointer; border:2px solid transparent; }
+
+/* ボタン */
+button { 
+  padding:0.7rem 1.2rem; 
+  margin:0.5rem; 
+  font-size:1rem;
+  border:none; 
+  border-radius:6px; 
+  background:#007bff; 
+  color:white; 
+  cursor:pointer; 
+}
+
+/* サムネイル */
+.thumbnail-container { 
+  display:flex; 
+  flex-wrap:wrap; 
+  justify-content:center; 
+  margin-top:1.5rem; 
+}
+.thumbnail { 
+  display:inline-block; 
+  margin:0.5rem; 
+  cursor:pointer; 
+  border:2px solid transparent; 
+}
 .thumbnail.selected { border-color:#007bff; }
-.thumbnail img { width:120px; height:68px; display:block; }
-.thumbnail span { display:block; font-size:0.9rem; margin-top:0.2rem; max-width:120px; word-wrap:break-word; }
+.thumbnail img { width:160px; height:90px; display:block; }
+.thumbnail span { 
+  display:block; 
+  font-size:1rem; 
+  margin-top:0.2rem; 
+  max-width:160px; 
+  word-wrap:break-word; 
+}
 </style>
 </head>
 <body>
 
-<h2>📺 サムネイル付き再生リストプレイヤー</h2>
+<h2>再生リストプレイヤー</h2>
 <div class="list-select" id="listSelectContainer"></div>
 
 <div class="video-container">
@@ -29,8 +57,8 @@ button { padding:0.5rem 1rem; margin:0.3rem; border:none; border-radius:6px; bac
 </div>
 
 <div class="controls">
-  <button id="prevBtn">⏮ 前へ</button>
-  <button id="nextBtn">⏭ 次へ</button>
+  <button id="prevBtn"> ⏮ </button>
+  <button id="nextBtn"> ⏭ </button>
 </div>
 
 <script>
@@ -40,7 +68,7 @@ let currentIndex = 0;
 let player;
 
 // JSON読み込み
-fetch('playlists.json') // 同リポジトリ内または外部URL
+fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
@@ -53,8 +81,8 @@ fetch('playlists.json') // 同リポジトリ内または外部URL
         div.className = 'thumbnail';
         div.dataset.playlist = key;
         div.dataset.index = vIdx;
-        // タイトル2種類を表示
-        div.innerHTML = `<img src="${video.thumbnail}" alt="${video.title_jp}">
+        // タイトル2種類表示
+        div.innerHTML = `<img src="${video.thumbnail}" alt="${video.gameTitle}">
                          <span>${video.gameTitle}<br>${video.musicTitle}</span>`;
         div.addEventListener('click', () => {
           currentPlaylist = pl.videos;
