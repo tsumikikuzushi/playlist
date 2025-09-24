@@ -13,8 +13,7 @@ body, html {
   background: #121212;
   color: white;
   font-family: sans-serif;
-  /* 縦中央寄せを削除 */
-  display: block;
+  display: block; /* 縦上寄せ */
 }
 
 .player-wrapper {
@@ -72,6 +71,15 @@ button:hover {
   background: #1ed760;
 }
 
+/* プレイリスト選択 */
+#playlistSelect {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+}
+
 /* プレイリスト表示 */
 .playlist-list {
   margin-top: 2rem;
@@ -114,6 +122,9 @@ button:hover {
 
 <div class="player-wrapper">
 
+  <!-- プレイリスト切替セレクト -->
+  <select id="playlistSelect"></select>
+
   <div class="video-container">
     <div id="player"></div>
   </div>
@@ -143,9 +154,27 @@ fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
-    const firstKey = Object.keys(playlists)[0];
-    currentPlaylist = playlists[firstKey].videos;
+    const playlistKeys = Object.keys(playlists);
+    const select = document.getElementById('playlistSelect');
+
+    // セレクトにプレイリスト追加
+    playlistKeys.forEach((key, idx) => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = playlists[key].label ?? key;
+      select.appendChild(opt);
+    });
+
+    // 最初のプレイリストを読み込み
+    currentPlaylist = playlists[playlistKeys[0]].videos;
     loadVideo(currentIndex);
+
+    // セレクト変更でプレイリスト切替
+    select.addEventListener('change', (e) => {
+      currentIndex = 0;
+      currentPlaylist = playlists[e.target.value].videos;
+      loadVideo(currentIndex);
+    });
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
