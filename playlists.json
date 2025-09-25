@@ -9,6 +9,13 @@
         "musicTitle": "KANAU", 
         "thumbnail": "http://img.youtube.com/vi/GgZI8ARPkuA/default.jpg" 
       }, 
+      { "videoId": "ro03M1PGbZw", 
+        "start": 1185, 
+        "end": 1365, 
+        "gameTitle": "ラディアンテイル", 
+        "musicTitle": "夕暮れ色", 
+        "thumbnail": "http://img.youtube.com/vi/ro03M1PGbZw/default.jpg" 
+      }, 
       { "videoId": "NUx-CVsx2XI", 
         "gameTitle": "ピオフィオーレの晩鐘", 
         "musicTitle": "ピオフィオーレの晩鐘 ～Heaven’s In Burlone", 
@@ -26,10 +33,15 @@
         "musicTitle": "向日葵のように", 
         "thumbnail": "http://img.youtube.com/vi/DQXUK_TQVsQ/default.jpg" 
       }, 
+      { "videoId": "ZL0wUkWGaNs", 
+        "gameTitle": "シャイニングニキ", 
+        "musicTitle": "光のワルツ", 
+        "thumbnail": "http://img.youtube.com/vi/ZL0wUkWGaNs/default.jpg" 
+      }, 
       { "videoId": "NisRO9FwhGo", 
         "start": 234, 
         "end": 457, 
-        "gameTitle": "千恋＊万花 ", 
+        "gameTitle": "千恋＊万花", 
         "musicTitle": "今昔の街", 
         "thumbnail": "http://img.youtube.com/vi/NisRO9FwhGo/default.jpg" 
       }, 
@@ -48,10 +60,35 @@
         "musicTitle": "Klaymen's Theme", 
         "thumbnail": "http://img.youtube.com/vi/D3xtj-QnM2s/default.jpg" 
       }, 
+      { "videoId": "xyd33vIkLvM", 
+        "gameTitle": "Shantae and the Pirate's Curse", 
+        "musicTitle": "RottyTops", 
+        "thumbnail": "http://img.youtube.com/vi/xyd33vIkLvM/default.jpg" 
+      }, 
+      { "videoId": "e2WYV0LuzvM", 
+        "gameTitle": "I am Bread", 
+        "musicTitle": "Garage Music", 
+        "thumbnail": "http://img.youtube.com/vi/e2WYV0LuzvM/default.jpg" 
+      }, 
+      { "videoId": "tD-wwW4PCek", 
+        "gameTitle": "ココロノココロン", 
+        "musicTitle": "黒の月", 
+        "thumbnail": "http://img.youtube.com/vi/tD-wwW4PCek/default.jpg" 
+      }, 
+      { "videoId": "tvueTeA5np0", 
+        "gameTitle": "くりきん ナノアイランドストーリー", 
+        "musicTitle": "VS.四天王", 
+        "thumbnail": "http://img.youtube.com/vi/tvueTeA5np0/default.jpg" 
+      }, 
       { "videoId": "TN7KBxq0a6o", 
         "gameTitle": "神姫PROJECT", 
         "musicTitle": "私の”楽園”", 
         "thumbnail": "http://img.youtube.com/vi/TN7KBxq0a6o/default.jpg" 
+      }, 
+      { "videoId": "-zt_VwEDOac", 
+        "gameTitle": "廻らぬ星のステラリウム", 
+        "musicTitle": "奔り抜ける者たち", 
+        "thumbnail": "http://img.youtube.com/vi/-zt_VwEDOac/default.jpg" 
       }, 
       { "videoId": "TUA19CxR0qQ", 
         "gameTitle": "バレットフィリア達の闇市場 ～ 100th Black Market.", 
@@ -61,12 +98,32 @@
     ]
   }, 
   "playlist2": {
-    "label": "リスト2 - 仮置き",
+    "label": "リスト2 - 【課題】有名曲もちゃんと聞こう",
     "videos": [
-      { "videoId": "tvueTeA5np0", 
-        "gameTitle": "くりきん ナノアイランドストーリー", 
-        "musicTitle": "VS.四天王", 
-        "thumbnail": "http://img.youtube.com/vi/tvueTeA5np0/default.jpg" 
+      { "videoId": "aH8HIebZlyg", 
+        "gameTitle": "大神", 
+        "musicTitle": "太陽は昇る", 
+        "thumbnail": "http://img.youtube.com/vi/aH8HIebZlyg/default.jpg" 
+      }, 
+      { "videoId": "uH-bOjFgyvY", 
+        "gameTitle": "ポケモン不思議のダンジョン 時の探検隊･闇の探検隊･空の探検隊", 
+        "musicTitle": "けっせん!ディアルガ!", 
+        "thumbnail": "http://img.youtube.com/vi/uH-bOjFgyvY/default.jpg" 
+      }, 
+      { "videoId": "jwJBWyTFCQI", 
+        "gameTitle": "星のカービィ トリプルデラックス", 
+        "musicTitle": "狂花水月", 
+        "thumbnail": "http://img.youtube.com/vi/jwJBWyTFCQI/default.jpg" 
+      }, 
+      { "videoId": "XDwvsMPiZ0M", 
+        "gameTitle": "ソフィーのアトリエ ～不思議な本の錬金術士～", 
+        "musicTitle": "雲雀東風", 
+        "thumbnail": "http://img.youtube.com/vi/XDwvsMPiZ0M/default.jpg" 
+      }, 
+      { "videoId": "i6NE2GT7xJA", 
+        "gameTitle": "東方鬼形獣 ～ Wily Beast and Weakest Creature.", 
+        "musicTitle": "偶像に世界を委ねて　～ Idoratrize World", 
+        "thumbnail": "http://img.youtube.com/vi/i6NE2GT7xJA/default.jpg" 
       }
     ]
   }
