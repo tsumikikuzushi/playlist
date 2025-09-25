@@ -1,2 +1,2 @@
-# youtube-playlist-player
+# playlist
 プレイリストまとめる用
