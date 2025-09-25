@@ -110,6 +110,11 @@
         "musicTitle": "けっせん!ディアルガ!", 
         "thumbnail": "http://img.youtube.com/vi/uH-bOjFgyvY/default.jpg" 
       }, 
+      { "videoId": "622OaLa78rE", 
+        "gameTitle": "ポケットモンスター スカーレット・バイオレット", 
+        "musicTitle": "戦闘！ゼロラボ", 
+        "thumbnail": "http://img.youtube.com/vi/622OaLa78rE/default.jpg" 
+      }, 
       { "videoId": "jwJBWyTFCQI", 
         "gameTitle": "星のカービィ トリプルデラックス", 
         "musicTitle": "狂花水月", 
@@ -124,6 +129,16 @@
         "gameTitle": "東方鬼形獣 ～ Wily Beast and Weakest Creature.", 
         "musicTitle": "偶像に世界を委ねて　～ Idoratrize World", 
         "thumbnail": "http://img.youtube.com/vi/i6NE2GT7xJA/default.jpg" 
+      }, 
+      { "videoId": "lgq0OdRIEao", 
+        "gameTitle": "ブルーアーカイブ -Blue Archive-", 
+        "musicTitle": "RE Aoharu", 
+        "thumbnail": "http://img.youtube.com/vi/lgq0OdRIEao/default.jpg" 
+      }, 
+      { "videoId": "2FTqceACO8g", 
+        "gameTitle": "ゼノブレイド2", 
+        "musicTitle": "戦闘!!／イーラ", 
+        "thumbnail": "http://img.youtube.com/vi/2FTqceACO8g/default.jpg" 
       }
     ]
   }
