@@ -1,94 +1,100 @@
-/* 全体レイアウト */
-body {
+body, html {
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  display: flex;
-  justify-content: center; /* 横方向のみ中央 */
+  background: #121212;
+  color: white;
+  font-family: sans-serif;
 }
 
-/* コンテナ */
-.container {
-  width: 100%;
-  max-width: 900px;
-  padding: 20px;
+/* プレイヤー中央寄せ */
+.player-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
 }
 
 /* プレイヤー */
-.player {
+.video-container {
   position: relative;
   width: 100%;
-  padding-bottom: 56.25%; /* 16:9比率 */
-  height: 0;
-  margin-bottom: 1rem;
+  padding-top: 56.25%; /* 16:9比率 */
+  margin: 0 auto;
 }
-
-.player iframe {
+#player {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  border: none;
+}
+
+/* タイトル表示 */
+.title-container {
+  margin-top: 1rem;
+}
+.title-container .musicTitle {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: white;
+}
+.title-container .gameTitle {
+  font-size: 1.1rem;
+  color: #aaa;
+  margin-top: 0.2rem;
 }
 
 /* プレイリスト切替 */
 .playlist-selector {
-  margin: 1rem 0;
+  margin-top: 1.5rem;
   text-align: center;
+  font-size: 1rem;
 }
-
+.playlist-selector label {
+  margin-right: 0.5rem;
+}
 .playlist-selector select {
   padding: 0.5rem;
   border-radius: 6px;
   border: none;
   font-size: 1rem;
+  background: #222;
+  color: white;
+  cursor: pointer;
 }
 
-/* 動画リスト */
-.list-container {
-  max-height: 400px;
-  overflow-y: auto;
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+/* プレイリスト表示 */
+.playlist-list {
+  margin-top: 2rem;
+  max-height: 200px;   /* スクロール領域の高さ */
+  overflow-y: auto;    /* 縦スクロール有効化 */
+  padding-right: 5px;
+  text-align: left;
 }
-
-.video-item {
+.playlist-item {
   display: flex;
   align-items: center;
-  margin-bottom: 0.75rem;
+  padding: 0.3rem;
   cursor: pointer;
-  transition: background 0.2s;
-  padding: 5px;
   border-radius: 6px;
 }
-
-.video-item:hover {
-  background: #f0f0f0;
+.playlist-item.selected {
+  background-color: #1db95433;
 }
-
-.video-item img {
-  width: 80px;
-  height: 45px;
-  object-fit: cover;
-  margin-right: 10px;
-  border-radius: 4px;
+.playlist-item img {
+  width: 50px;
+  height: 50px;
+  margin-right: 0.5rem;
 }
-
-.video-info {
+.playlist-item .titles {
   display: flex;
   flex-direction: column;
 }
-
-.video-info .music-title {
+.playlist-item .titles .musicTitle {
   font-weight: bold;
-  font-size: 0.95rem;
+  color: white;
 }
-
-.video-info .game-title {
-  font-size: 0.85rem;
-  color: #555;
+.playlist-item .titles .gameTitle {
+  font-size: 0.9rem;
+  color: #aaa;
 }
