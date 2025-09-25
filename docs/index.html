@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私選ゲームBGMプレイヤー</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="player-wrapper">
+
+  <div class="video-container">
+    <div id="player"></div>
+  </div>
+
+  <div class="title-container">
+    <div class="musicTitle" id="musicTitle"></div>
+    <div class="gameTitle" id="gameTitle"></div>
+  </div>
+
+  <!-- プレイリスト切替セレクター -->
+  <div class="playlist-selector">
+    <label for="playlistSelect">プレイリスト切替：</label>
+    <select id="playlistSelect"></select>
+  </div>
+
+  <div class="playlist-list" id="playlistList"></div>
+
+</div>
+
+<script>
+let playlists = {};
+let currentPlaylist = [];
+let currentIndex = 0;
+let player;
+
+// JSON読み込み
+fetch('playlists.json')
+  .then(res => res.json())
+  .then(data => {
+    playlists = data;
+
+    // セレクトボックスに追加
+    const select = document.getElementById('playlistSelect');
+    Object.keys(playlists).forEach(key => {
+      const option = document.createElement('option');
+      option.value = key;
+      option.textContent = playlists[key].label;
+      select.appendChild(option);
+    });
+
+    // 初期プレイリスト設定
+    const firstKey = Object.keys(playlists)[0];
+    currentPlaylist = playlists[firstKey].videos;
+    loadVideo(currentIndex);
+  })
+  .catch(err => console.error('JSON読み込みエラー:', err));
+
+// プレイリスト切替時
+document.getElementById('playlistSelect').addEventListener('change', e => {
+  const key = e.target.value;
+  currentPlaylist = playlists[key].videos;
+  currentIndex = 0;
+  loadVideo(currentIndex);
+});
+
+// YouTube API準備完了
+function onYouTubeIframeAPIReady() {
+  loadVideo(currentIndex);
+}
+
+// 動画ロード + タイトル更新 + プレイリストハイライト
+function loadVideo(index) {
+  const video = currentPlaylist[index];
+  if (!video) return;
+
+  document.getElementById('musicTitle').textContent = video.musicTitle;
+  document.getElementById('gameTitle').textContent = video.gameTitle;
+
+  if (player) {
+    player.loadVideoById({ videoId: video.videoId, startSeconds: video.start ?? 0, endSeconds: video.end ?? undefined });
+  } else {
+    player = new YT.Player('player', {
+      videoId: video.videoId,
+      playerVars: { autoplay: 0, controls: 1 }
+    });
+  }
+
+  renderPlaylistList();
+}
+
+// プレイリストリストレンダリング
+function renderPlaylistList() {
+  const container = document.getElementById('playlistList');
+  container.innerHTML = '';
+  currentPlaylist.forEach((video, idx) => {
+    const item = document.createElement('div');
+    item.className = 'playlist-item' + (idx === currentIndex ? ' selected' : '');
+    item.innerHTML = `<img src="${video.thumbnail}" alt="${video.musicTitle}">
+                      <div class="titles">
+                        <div class="musicTitle">${video.musicTitle}</div>
+                        <div class="gameTitle">${video.gameTitle}</div>
+                      </div>`;
+    item.addEventListener('click', () => {
+      currentIndex = idx;
+      loadVideo(currentIndex);
+    });
+    container.appendChild(item);
+  });
+}
+</script>
+
+</body>
+</html>
