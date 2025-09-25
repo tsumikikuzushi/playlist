@@ -1,217 +1,107 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>私選ゲームBGMプレイヤー</title>
-<script src="https://www.youtube.com/iframe_api"></script>
-<style>
-body, html {
-  margin: 0;
-  padding: 0;
-  background: #121212;
-  color: white;
-  font-family: sans-serif;
-}
-
-/* プレイヤー中央寄せ */
-.player-wrapper {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 1rem;
-  text-align: center;
-}
-
-/* プレイヤー */
-.video-container {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%; /* 16:9比率 */
-  margin: 0 auto;
-}
-#player {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* タイトル表示 */
-.title-container {
-  margin-top: 1rem;
-}
-.title-container .musicTitle {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: white;
-}
-.title-container .gameTitle {
-  font-size: 1.1rem;
-  color: #aaa;
-  margin-top: 0.2rem;
-}
-
-/* プレイリスト切替 */
-.playlist-selector {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-size: 1rem;
-}
-.playlist-selector label {
-  margin-right: 0.5rem;
-}
-.playlist-selector select {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: none;
-  font-size: 1rem;
-  background: #222;
-  color: white;
-  cursor: pointer;
-}
-
-/* プレイリスト表示 */
-.playlist-list {
-  margin-top: 2rem;
-  max-height: 200px;   /* スクロール領域の高さ */
-  overflow-y: auto;    /* 縦スクロール有効化 */
-  padding-right: 5px;
-  text-align: left;
-}
-.playlist-item {
-  display: flex;
-  align-items: center;
-  padding: 0.3rem;
-  cursor: pointer;
-  border-radius: 6px;
-}
-.playlist-item.selected {
-  background-color: #1db95433;
-}
-.playlist-item img {
-  width: 50px;
-  height: 50px;
-  margin-right: 0.5rem;
-}
-.playlist-item .titles {
-  display: flex;
-  flex-direction: column;
-}
-.playlist-item .titles .musicTitle {
-  font-weight: bold;
-  color: white;
-}
-.playlist-item .titles .gameTitle {
-  font-size: 0.9rem;
-  color: #aaa;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>私選ゲームBGM Player</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <div class="container">
+    <!-- YouTubeプレイヤー -->
+    <div class="player">
+      <iframe id="player" src="" allowfullscreen></iframe>
+    </div>
 
-<div class="player-wrapper">
+    <!-- プレイリスト切り替え -->
+    <div class="playlist-selector">
+      <label for="playlist">プレイリストを選択: </label>
+      <select id="playlist"></select>
+    </div>
 
-  <div class="video-container">
-    <div id="player"></div>
+    <!-- 動画リスト -->
+    <div id="list" class="list-container"></div>
   </div>
 
-  <div class="title-container">
-    <div class="musicTitle" id="musicTitle"></div>
-    <div class="gameTitle" id="gameTitle"></div>
-  </div>
+  <script>
+    let playlistsData = {};
+    let currentPlaylist = "";
+    let currentVideoIndex = 0;
 
-  <!-- プレイリスト切替セレクター -->
-  <div class="playlist-selector">
-    <label for="playlistSelect">プレイリスト切替：</label>
-    <select id="playlistSelect"></select>
-  </div>
+    // JSON読み込み
+    async function loadPlaylists() {
+      try {
+        const response = await fetch("playlists.json");
+        if (!response.ok) throw new Error("JSON読み込み失敗");
+        playlistsData = await response.json();
 
-  <div class="playlist-list" id="playlistList"></div>
+        const selector = document.getElementById("playlist");
+        selector.innerHTML = "";
 
-</div>
+        // セレクタにプレイリスト追加
+        Object.keys(playlistsData).forEach((key, index) => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = playlistsData[key].title;
+          selector.appendChild(option);
 
-<script>
-let playlists = {};
-let currentPlaylist = [];
-let currentIndex = 0;
-let player;
+          if (index === 0) {
+            currentPlaylist = key;
+          }
+        });
 
-// JSON読み込み
-fetch('playlists.json')
-  .then(res => res.json())
-  .then(data => {
-    playlists = data;
+        // 最初のプレイリストを表示
+        loadPlaylist(currentPlaylist);
 
-    // セレクトボックスに追加
-    const select = document.getElementById('playlistSelect');
-    Object.keys(playlists).forEach(key => {
-      const option = document.createElement('option');
-      option.value = key;
-      option.textContent = playlists[key].label;
-      select.appendChild(option);
-    });
+        // セレクタ変更時の処理
+        selector.addEventListener("change", (e) => {
+          currentPlaylist = e.target.value;
+          loadPlaylist(currentPlaylist);
+        });
 
-    // 初期プレイリスト設定
-    const firstKey = Object.keys(playlists)[0];
-    currentPlaylist = playlists[firstKey].videos;
-    loadVideo(currentIndex);
-  })
-  .catch(err => console.error('JSON読み込みエラー:', err));
+      } catch (err) {
+        console.error("プレイリスト読み込みエラー:", err);
+      }
+    }
 
-// プレイリスト切替時
-document.getElementById('playlistSelect').addEventListener('change', e => {
-  const key = e.target.value;
-  currentPlaylist = playlists[key].videos;
-  currentIndex = 0;
-  loadVideo(currentIndex);
-});
+    // プレイリスト切り替え
+    function loadPlaylist(key) {
+      const videos = playlistsData[key].videos;
+      currentVideoIndex = 0;
+      renderList(videos);
+      loadVideo(videos[currentVideoIndex].videoId);
+    }
 
-// YouTube API準備完了
-function onYouTubeIframeAPIReady() {
-  loadVideo(currentIndex);
-}
+    // プレイヤーに動画を読み込む
+    function loadVideo(videoId) {
+      document.getElementById("player").src = 
+        `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+    }
 
-// 動画ロード + タイトル更新 + プレイリストハイライト
-function loadVideo(index) {
-  const video = currentPlaylist[index];
-  if (!video) return;
+    // 動画リストを描画
+    function renderList(videos) {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      videos.forEach((video, index) => {
+        const item = document.createElement("div");
+        item.className = "video-item";
+        item.innerHTML = `
+          <img src="${video.thumbnail}" alt="${video.musicTitle}">
+          <div class="video-info">
+            <div class="music-title">${video.musicTitle}</div>
+            <div class="game-title">${video.gameTitle}</div>
+          </div>
+        `;
+        item.addEventListener("click", () => {
+          currentVideoIndex = index;
+          loadVideo(video.videoId);
+        });
+        list.appendChild(item);
+      });
+    }
 
-  document.getElementById('musicTitle').textContent = video.musicTitle;
-  document.getElementById('gameTitle').textContent = video.gameTitle;
-
-  if (player) {
-    player.loadVideoById({ videoId: video.videoId, startSeconds: video.start ?? 0, endSeconds: video.end ?? undefined });
-  } else {
-    player = new YT.Player('player', {
-      videoId: video.videoId,
-      playerVars: { autoplay: 0, controls: 1 }
-    });
-  }
-
-  renderPlaylistList();
-}
-
-// プレイリストリストレンダリング
-function renderPlaylistList() {
-  const container = document.getElementById('playlistList');
-  container.innerHTML = '';
-  currentPlaylist.forEach((video, idx) => {
-    const item = document.createElement('div');
-    item.className = 'playlist-item' + (idx === currentIndex ? ' selected' : '');
-    item.innerHTML = `<img src="${video.thumbnail}" alt="${video.musicTitle}">
-                      <div class="titles">
-                        <div class="musicTitle">${video.musicTitle}</div>
-                        <div class="gameTitle">${video.gameTitle}</div>
-                      </div>`;
-    item.addEventListener('click', () => {
-      currentIndex = idx;
-      loadVideo(currentIndex);
-    });
-    container.appendChild(item);
-  });
-}
-</script>
-
+    // 初期化
+    loadPlaylists();
+  </script>
 </body>
 </html>
