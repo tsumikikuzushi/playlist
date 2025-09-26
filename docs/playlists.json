@@ -4,7 +4,7 @@
     "videos": [
       { "videoId": "GgZI8ARPkuA", 
         "start": 2056, 
-        "end": 2152, 
+        "end": 2151.5, 
         "gameTitle": "CharadeManiacs", 
         "musicTitle": "KANAU", 
         "thumbnail": "http://img.youtube.com/vi/GgZI8ARPkuA/default.jpg" 
@@ -34,8 +34,8 @@
         "thumbnail": "http://img.youtube.com/vi/DQXUK_TQVsQ/default.jpg" 
       }, 
       { "videoId": "Ug-VuDgAV3k", 
-        "start": 2338, 
-        "end": 2425, 
+        "start": 2337.5, 
+        "end": 2424.5, 
         "gameTitle": "蒼の彼方のフォーリズム", 
         "musicTitle": "明日への一歩", 
         "thumbnail": "http://img.youtube.com/vi/Ug-VuDgAV3k/default.jpg" 
