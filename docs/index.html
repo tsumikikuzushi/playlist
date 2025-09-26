@@ -33,7 +33,7 @@
 <script>
 let playlists = {};
 let currentPlaylist = [];
-let currentIndex = -1;
+let currentIndex = -1; // 選択なし
 let player;
 
 // JSON読み込み
@@ -42,6 +42,7 @@ fetch('playlists.json')
   .then(data => {
     playlists = data;
 
+    // セレクトボックスに追加
     const select = document.getElementById('playlistSelect');
     Object.keys(playlists).forEach(key => {
       const option = document.createElement('option');
@@ -54,7 +55,8 @@ fetch('playlists.json')
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
     renderPlaylistList();
-  });
+  })
+  .catch(err => console.error('JSON読み込みエラー:', err));
 
 // プレイリスト切替時
 document.getElementById('playlistSelect').addEventListener('change', e => {
@@ -64,7 +66,7 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   document.getElementById('musicTitle').textContent = '';
   document.getElementById('gameTitle').textContent = '';
 
-  // プレイヤー破棄 + DOMリセット
+  // 既存プレイヤー破棄 + DOMリセット
   if (player) {
     player.destroy();
     player = null;
@@ -74,10 +76,10 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   renderPlaylistList();
 });
 
-// 初回生成待ち
+// YouTube API準備完了（初回は何もしない）
 function onYouTubeIframeAPIReady() {}
 
-// 動画ロード + 再生
+// 動画ロード + タイトル更新 + 自動再生 + start/end反映
 function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
@@ -88,22 +90,28 @@ function loadVideo(index) {
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
   if (!player) {
+    // プレイヤー未生成の場合
     player = new YT.Player('player', {
       videoId: video.videoId,
       playerVars: { autoplay: 0, controls: 1 },
       events: {
         onReady: e => {
-          e.target.playVideo(); // 生成直後に再生
+          // loadVideoById で start/end を反映しつつ再生
+          e.target.loadVideoById({
+            videoId: video.videoId,
+            startSeconds: video.start ?? 0,
+            endSeconds: video.end ?? undefined
+          });
         }
       }
     });
   } else {
+    // 既存プレイヤーで動画切替
     player.loadVideoById({
       videoId: video.videoId,
       startSeconds: video.start ?? 0,
       endSeconds: video.end ?? undefined
     });
-    player.playVideo();
   }
 
   renderPlaylistList();
