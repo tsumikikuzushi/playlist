@@ -33,10 +33,10 @@
         "musicTitle": "向日葵のように", 
         "thumbnail": "http://img.youtube.com/vi/DQXUK_TQVsQ/default.jpg" 
       }, 
-      { "videoId": "ZL0wUkWGaNs", 
-        "gameTitle": "シャイニングニキ", 
-        "musicTitle": "光のワルツ", 
-        "thumbnail": "http://img.youtube.com/vi/ZL0wUkWGaNs/default.jpg" 
+      { "videoId": "wPxfkUNAK68", 
+        "gameTitle": "蒼の彼方のフォーリズム", 
+        "musicTitle": "明日への一歩", 
+        "thumbnail": "http://img.youtube.com/vi/wPxfkUNAK68/default.jpg" 
       }, 
       { "videoId": "NisRO9FwhGo", 
         "start": 234, 
@@ -84,6 +84,11 @@
         "gameTitle": "神姫PROJECT", 
         "musicTitle": "私の”楽園”", 
         "thumbnail": "http://img.youtube.com/vi/TN7KBxq0a6o/default.jpg" 
+      }, 
+      { "videoId": "ZL0wUkWGaNs", 
+        "gameTitle": "シャイニングニキ", 
+        "musicTitle": "光のワルツ", 
+        "thumbnail": "http://img.youtube.com/vi/ZL0wUkWGaNs/default.jpg" 
       }, 
       { "videoId": "-zt_VwEDOac", 
         "gameTitle": "廻らぬ星のステラリウム", 
