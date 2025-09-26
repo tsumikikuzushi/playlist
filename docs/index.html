@@ -51,19 +51,19 @@ fetch('playlists.json')
       select.appendChild(option);
     });
 
-    // 初期プレイリスト設定
+    // 初期プレイリスト設定（自動再生なし）
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
-    cueVideo(currentIndex); // 初期ロードは cue（再生しない）
+    cueVideo(currentIndex);
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-// プレイリスト切替時（再生しない）
+// プレイリスト切替時（自動再生なし）
 document.getElementById('playlistSelect').addEventListener('change', e => {
   const key = e.target.value;
   currentPlaylist = playlists[key].videos;
   currentIndex = 0;
-  cueVideo(currentIndex);
+  cueVideo(currentIndex); // 自動再生せずに準備
 });
 
 // YouTube API準備完了
@@ -78,6 +78,7 @@ function cueVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
+  currentIndex = index;
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
@@ -87,22 +88,20 @@ function cueVideo(index) {
       startSeconds: video.start ?? 0,
       endSeconds: video.end ?? undefined
     });
-    player.stopVideo(); // ← 再生を確実に停止
+    player.stopVideo(); // 再生停止
   } else {
     player = new YT.Player('player', {
       videoId: video.videoId,
       playerVars: { autoplay: 0, controls: 1, mute: 1 },
       events: {
         'onReady': () => {
-          if (video.start) {
-            player.seekTo(video.start, true);
-          }
-          player.stopVideo(); // ← 初期化時も停止
+          if (video.start) player.seekTo(video.start, true);
+          player.stopVideo();
         },
         'onStateChange': e => {
           if (e.data === YT.PlayerState.CUED && video.start) {
             player.seekTo(video.start, true);
-            player.stopVideo(); // ← CUEDになったら停止
+            player.stopVideo();
           }
         }
       }
@@ -119,10 +118,9 @@ function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
+  currentIndex = index;
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
-
-  currentIndex = index;
 
   if (player) {
     player.loadVideoById({
@@ -135,7 +133,9 @@ function loadVideo(index) {
   renderPlaylistList();
 }
 
+// ------------------------
 // プレイリストリストレンダリング
+// ------------------------
 function renderPlaylistList() {
   const container = document.getElementById('playlistList');
   container.innerHTML = '';
@@ -148,7 +148,7 @@ function renderPlaylistList() {
                         <div class="gameTitle">${video.gameTitle}</div>
                       </div>`;
     item.addEventListener('click', () => {
-      loadVideo(idx); // ← クリック時のみ再生
+      loadVideo(idx); // クリック時のみ再生
     });
     container.appendChild(item);
   });
