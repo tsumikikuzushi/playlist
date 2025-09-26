@@ -33,7 +33,7 @@
 <script>
 let playlists = {};
 let currentPlaylist = [];
-let currentIndex = -1; // 選択なし
+let currentIndex = -1; // 初期は選択なし
 let player;
 
 // JSON読み込み
@@ -66,12 +66,12 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   document.getElementById('musicTitle').textContent = '';
   document.getElementById('gameTitle').textContent = '';
   renderPlaylistList();
+  // 動画はロードしない
 });
 
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  // 初回は動画をロードせずリストだけ表示
-  // 動画はクリック時にロード
+  // 初回は動画ロードせず
 }
 
 // 動画ロード + タイトル更新 + プレイリストハイライト
@@ -79,15 +79,22 @@ function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
+  currentIndex = index; // 選択中インデックス更新
+
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
-  if (player) {
-    player.loadVideoById({ videoId: video.videoId, startSeconds: video.start ?? 0, endSeconds: video.end ?? undefined });
-  } else {
+  if (!player) {
+    // プレイヤー未生成ならここで生成
     player = new YT.Player('player', {
       videoId: video.videoId,
       playerVars: { autoplay: 0, controls: 1 }
+    });
+  } else {
+    player.loadVideoById({ 
+      videoId: video.videoId, 
+      startSeconds: video.start ?? 0, 
+      endSeconds: video.end ?? undefined 
     });
   }
 
@@ -107,8 +114,7 @@ function renderPlaylistList() {
                         <div class="gameTitle">${video.gameTitle}</div>
                       </div>`;
     item.addEventListener('click', () => {
-      currentIndex = idx;
-      loadVideo(currentIndex);
+      loadVideo(idx);
     });
     container.appendChild(item);
   });
