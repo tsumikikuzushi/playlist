@@ -33,7 +33,7 @@
 <script>
 let playlists = {};
 let currentPlaylist = [];
-let currentIndex = 0;
+let currentIndex = -1; // 選択なし
 let player;
 
 // JSON読み込み
@@ -51,10 +51,10 @@ fetch('playlists.json')
       select.appendChild(option);
     });
 
-    // 初期プレイリスト設定
+    // 初期プレイリスト設定（動画ロードはしない）
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
-    loadVideo(currentIndex);
+    renderPlaylistList();
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
@@ -62,13 +62,16 @@ fetch('playlists.json')
 document.getElementById('playlistSelect').addEventListener('change', e => {
   const key = e.target.value;
   currentPlaylist = playlists[key].videos;
-  currentIndex = 0;
-  loadVideo(currentIndex);
+  currentIndex = -1; // 選択なし
+  document.getElementById('musicTitle').textContent = '';
+  document.getElementById('gameTitle').textContent = '';
+  renderPlaylistList();
 });
 
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  loadVideo(currentIndex);
+  // 初回は動画をロードせずリストだけ表示
+  // 動画はクリック時にロード
 }
 
 // 動画ロード + タイトル更新 + プレイリストハイライト
@@ -97,7 +100,7 @@ function renderPlaylistList() {
   container.innerHTML = '';
   currentPlaylist.forEach((video, idx) => {
     const item = document.createElement('div');
-    item.className = 'playlist-item' + (idx === currentIndex ? ' selected' : '');
+    item.className = 'playlist-item' + (idx === currentIndex && currentIndex >= 0 ? ' selected' : '');
     item.innerHTML = `<img src="${video.thumbnail}" alt="${video.musicTitle}">
                       <div class="titles">
                         <div class="musicTitle">${video.musicTitle}</div>
