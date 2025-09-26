@@ -54,27 +54,25 @@ fetch('playlists.json')
     // 初期プレイリスト設定
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
-    cueVideo(currentIndex); // 初期ロードは cue（再生しない）
+    loadVideo(currentIndex, false); // 初期ロードは自動再生なし
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-// プレイリスト切替時（再生しない）
+// プレイリスト切替時（自動再生なし）
 document.getElementById('playlistSelect').addEventListener('change', e => {
   const key = e.target.value;
   currentPlaylist = playlists[key].videos;
   currentIndex = 0;
-  cueVideo(currentIndex);
+  loadVideo(currentIndex, false);
 });
 
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  cueVideo(currentIndex);
+  loadVideo(currentIndex, false);
 }
 
-// ------------------------
-// cue（再生せず準備）
-// ------------------------
-function cueVideo(index) {
+// 動画ロード + タイトル更新 + プレイリストハイライト
+function loadVideo(index, autoplay = true) {
   const video = currentPlaylist[index];
   if (!video) return;
 
@@ -82,48 +80,48 @@ function cueVideo(index) {
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
   if (player) {
-    player.cueVideoById({
-      videoId: video.videoId,
-      startSeconds: video.start ?? 0,
-      endSeconds: video.end ?? undefined
-    });
+    if (autoplay) {
+      // 自動再生あり
+      player.loadVideoById({
+        videoId: video.videoId,
+        startSeconds: video.start ?? 0,
+        endSeconds: video.end ?? undefined
+      });
+    } else {
+      // 自動再生なし
+      player.cueVideoById({
+        videoId: video.videoId,
+        startSeconds: video.start ?? 0,
+        endSeconds: video.end ?? undefined
+      });
+
+      // CUED 状態でシーク強制
+      const onCue = e => {
+        if (e.data === YT.PlayerState.CUED && video.start) {
+          player.seekTo(video.start, true);
+          player.removeEventListener("onStateChange", onCue);
+        }
+      };
+      player.addEventListener("onStateChange", onCue);
+    }
   } else {
+    // プレイヤー未生成時
     player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { autoplay: 0, controls: 1 },
+      playerVars: { autoplay: autoplay ? 1 : 0, controls: 1 },
       events: {
         'onReady': () => {
-          if (video.start) {
+          if (!autoplay && video.start) {
             player.seekTo(video.start, true);
           }
         },
         'onStateChange': e => {
-          if (e.data === YT.PlayerState.CUED && video.start) {
+          // cue 時に必ず start へ移動
+          if (e.data === YT.PlayerState.CUED && !autoplay && video.start) {
             player.seekTo(video.start, true);
           }
         }
       }
-    });
-  }
-
-  renderPlaylistList();
-}
-
-// ------------------------
-// load（クリック時のみ再生）
-// ------------------------
-function loadVideo(index) {
-  const video = currentPlaylist[index];
-  if (!video) return;
-
-  document.getElementById('musicTitle').textContent = video.musicTitle;
-  document.getElementById('gameTitle').textContent = video.gameTitle;
-
-  if (player) {
-    player.loadVideoById({
-      videoId: video.videoId,
-      startSeconds: video.start ?? 0,
-      endSeconds: video.end ?? undefined
     });
   }
 
@@ -144,7 +142,7 @@ function renderPlaylistList() {
                       </div>`;
     item.addEventListener('click', () => {
       currentIndex = idx;
-      loadVideo(currentIndex); // ← クリック時は必ず再生
+      loadVideo(currentIndex, true); // リストクリック時は自動再生あり
     });
     container.appendChild(item);
   });
