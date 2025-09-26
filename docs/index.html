@@ -87,19 +87,22 @@ function cueVideo(index) {
       startSeconds: video.start ?? 0,
       endSeconds: video.end ?? undefined
     });
+    player.stopVideo(); // ← 再生を確実に停止
   } else {
     player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { autoplay: 0, controls: 1 },
+      playerVars: { autoplay: 0, controls: 1, mute: 1 },
       events: {
         'onReady': () => {
           if (video.start) {
             player.seekTo(video.start, true);
           }
+          player.stopVideo(); // ← 初期化時も停止
         },
         'onStateChange': e => {
           if (e.data === YT.PlayerState.CUED && video.start) {
             player.seekTo(video.start, true);
+            player.stopVideo(); // ← CUEDになったら停止
           }
         }
       }
@@ -118,6 +121,8 @@ function loadVideo(index) {
 
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
+
+  currentIndex = index;
 
   if (player) {
     player.loadVideoById({
@@ -143,8 +148,7 @@ function renderPlaylistList() {
                         <div class="gameTitle">${video.gameTitle}</div>
                       </div>`;
     item.addEventListener('click', () => {
-      currentIndex = idx;
-      loadVideo(currentIndex); // ← クリック時は必ず再生
+      loadVideo(idx); // ← クリック時のみ再生
     });
     container.appendChild(item);
   });
