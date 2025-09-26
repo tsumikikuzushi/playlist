@@ -54,7 +54,7 @@ fetch('playlists.json')
     // 初期プレイリスト設定
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
-    loadVideo(currentIndex);
+    loadVideo(currentIndex, false); // 初期ロード → 自動再生なし
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
@@ -63,16 +63,16 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   const key = e.target.value;
   currentPlaylist = playlists[key].videos;
   currentIndex = 0;
-  loadVideo(currentIndex);
+  loadVideo(currentIndex, false); // 切替時 → 自動再生なし
 });
 
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  loadVideo(currentIndex);
+  loadVideo(currentIndex, false); // API準備時も自動再生なし
 }
 
 // 動画ロード + タイトル更新 + プレイリストハイライト
-function loadVideo(index) {
+function loadVideo(index, autoplay = true) {
   const video = currentPlaylist[index];
   if (!video) return;
 
@@ -80,7 +80,21 @@ function loadVideo(index) {
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
   if (player) {
-    player.loadVideoById({ videoId: video.videoId, startSeconds: video.start ?? 0, endSeconds: video.end ?? undefined });
+    if (autoplay) {
+      // 自動再生あり
+      player.loadVideoById({
+        videoId: video.videoId,
+        startSeconds: video.start ?? 0,
+        endSeconds: video.end ?? undefined
+      });
+    } else {
+      // 自動再生なし
+      player.cueVideoById({
+        videoId: video.videoId,
+        startSeconds: video.start ?? 0,
+        endSeconds: video.end ?? undefined
+      });
+    }
   } else {
     player = new YT.Player('player', {
       videoId: video.videoId,
@@ -105,7 +119,7 @@ function renderPlaylistList() {
                       </div>`;
     item.addEventListener('click', () => {
       currentIndex = idx;
-      loadVideo(currentIndex);
+      loadVideo(currentIndex, true); // クリック時 → 自動再生あり
     });
     container.appendChild(item);
   });
