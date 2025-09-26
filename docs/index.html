@@ -54,25 +54,25 @@ fetch('playlists.json')
     // 初期プレイリスト設定
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
-    loadVideo(currentIndex, false); // 初期ロードは自動再生なし
+    loadVideo(currentIndex);
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-// プレイリスト切替時（自動再生なし）
+// プレイリスト切替時
 document.getElementById('playlistSelect').addEventListener('change', e => {
   const key = e.target.value;
   currentPlaylist = playlists[key].videos;
   currentIndex = 0;
-  loadVideo(currentIndex, false);
+  loadVideo(currentIndex);
 });
 
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  loadVideo(currentIndex, false);
+  loadVideo(currentIndex);
 }
 
 // 動画ロード + タイトル更新 + プレイリストハイライト
-function loadVideo(index, autoplay = true) {
+function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
@@ -80,48 +80,11 @@ function loadVideo(index, autoplay = true) {
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
   if (player) {
-    if (autoplay) {
-      // 自動再生あり
-      player.loadVideoById({
-        videoId: video.videoId,
-        startSeconds: video.start ?? 0,
-        endSeconds: video.end ?? undefined
-      });
-    } else {
-      // 自動再生なし
-      player.cueVideoById({
-        videoId: video.videoId,
-        startSeconds: video.start ?? 0,
-        endSeconds: video.end ?? undefined
-      });
-
-      // CUED 状態でシーク強制
-      const onCue = e => {
-        if (e.data === YT.PlayerState.CUED && video.start) {
-          player.seekTo(video.start, true);
-          player.removeEventListener("onStateChange", onCue);
-        }
-      };
-      player.addEventListener("onStateChange", onCue);
-    }
+    player.loadVideoById({ videoId: video.videoId, startSeconds: video.start ?? 0, endSeconds: video.end ?? undefined });
   } else {
-    // プレイヤー未生成時
     player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { autoplay: autoplay ? 1 : 0, controls: 1 },
-      events: {
-        'onReady': () => {
-          if (!autoplay && video.start) {
-            player.seekTo(video.start, true);
-          }
-        },
-        'onStateChange': e => {
-          // cue 時に必ず start へ移動
-          if (e.data === YT.PlayerState.CUED && !autoplay && video.start) {
-            player.seekTo(video.start, true);
-          }
-        }
-      }
+      playerVars: { autoplay: 0, controls: 1 }
     });
   }
 
@@ -142,7 +105,7 @@ function renderPlaylistList() {
                       </div>`;
     item.addEventListener('click', () => {
       currentIndex = idx;
-      loadVideo(currentIndex, true); // リストクリック時は自動再生あり
+      loadVideo(currentIndex);
     });
     container.appendChild(item);
   });
