@@ -95,7 +95,7 @@ function loadVideo(index, autoplay = true) {
         endSeconds: video.end ?? undefined
       });
 
-      // CUED 状態になったらシーク
+      // CUED 状態でシーク強制
       const onCue = e => {
         if (e.data === YT.PlayerState.CUED && video.start) {
           player.seekTo(video.start, true);
@@ -112,6 +112,12 @@ function loadVideo(index, autoplay = true) {
       events: {
         'onReady': () => {
           if (!autoplay && video.start) {
+            player.seekTo(video.start, true);
+          }
+        },
+        'onStateChange': e => {
+          // cue 時に必ず start へ移動
+          if (e.data === YT.PlayerState.CUED && !autoplay && video.start) {
             player.seekTo(video.start, true);
           }
         }
