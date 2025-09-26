@@ -33,7 +33,7 @@
 <script>
 let playlists = {};
 let currentPlaylist = [];
-let currentIndex = -1; // 初期は選択なし
+let currentIndex = -1; // 選択なし
 let player;
 
 // JSON読み込み
@@ -65,14 +65,19 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   currentIndex = -1; // 選択なし
   document.getElementById('musicTitle').textContent = '';
   document.getElementById('gameTitle').textContent = '';
+  
+  // 既存プレイヤーがあれば破棄
+  if (player) {
+    player.destroy();
+    player = null;
+    document.getElementById('player').innerHTML = '';
+  }
+
   renderPlaylistList();
-  // 動画はロードしない
 });
 
-// YouTube API準備完了
-function onYouTubeIframeAPIReady() {
-  // 初回は動画ロードせず
-}
+// YouTube API準備完了（初回は何もしない）
+function onYouTubeIframeAPIReady() {}
 
 // 動画ロード + タイトル更新 + プレイリストハイライト
 function loadVideo(index) {
@@ -80,15 +85,14 @@ function loadVideo(index) {
   if (!video) return;
 
   currentIndex = index; // 選択中インデックス更新
-
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
   if (!player) {
-    // プレイヤー未生成ならここで生成
+    // 初回生成時は autoplay 1
     player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { autoplay: 0, controls: 1 }
+      playerVars: { autoplay: 1, controls: 1 }
     });
   } else {
     player.loadVideoById({ 
