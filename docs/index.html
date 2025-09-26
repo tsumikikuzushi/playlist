@@ -51,19 +51,19 @@ fetch('playlists.json')
       select.appendChild(option);
     });
 
-    // 初期プレイリスト設定（自動再生なし）
+    // 初期プレイリスト設定
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
-    cueVideo(currentIndex);
+    cueVideo(currentIndex); // 初期ロードは cue（再生しない）
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-// プレイリスト切替時（自動再生なし）
+// プレイリスト切替時（再生しない）
 document.getElementById('playlistSelect').addEventListener('change', e => {
   const key = e.target.value;
   currentPlaylist = playlists[key].videos;
   currentIndex = 0;
-  cueVideo(currentIndex); // 自動再生せずに準備
+  cueVideo(currentIndex);
 });
 
 // YouTube API準備完了
@@ -78,7 +78,6 @@ function cueVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
-  currentIndex = index;
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
@@ -88,20 +87,19 @@ function cueVideo(index) {
       startSeconds: video.start ?? 0,
       endSeconds: video.end ?? undefined
     });
-    player.stopVideo(); // 再生停止
   } else {
     player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { autoplay: 0, controls: 1, mute: 1 },
+      playerVars: { autoplay: 0, controls: 1 },
       events: {
         'onReady': () => {
-          if (video.start) player.seekTo(video.start, true);
-          player.stopVideo();
+          if (video.start) {
+            player.seekTo(video.start, true);
+          }
         },
         'onStateChange': e => {
           if (e.data === YT.PlayerState.CUED && video.start) {
             player.seekTo(video.start, true);
-            player.stopVideo();
           }
         }
       }
@@ -118,7 +116,6 @@ function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
-  currentIndex = index;
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
@@ -133,9 +130,7 @@ function loadVideo(index) {
   renderPlaylistList();
 }
 
-// ------------------------
 // プレイリストリストレンダリング
-// ------------------------
 function renderPlaylistList() {
   const container = document.getElementById('playlistList');
   container.innerHTML = '';
@@ -148,7 +143,8 @@ function renderPlaylistList() {
                         <div class="gameTitle">${video.gameTitle}</div>
                       </div>`;
     item.addEventListener('click', () => {
-      loadVideo(idx); // クリック時のみ再生
+      currentIndex = idx;
+      loadVideo(currentIndex); // ← クリック時は必ず再生
     });
     container.appendChild(item);
   });
