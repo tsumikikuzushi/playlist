@@ -33,24 +33,38 @@ let currentIndex = -1;
 let player;
 let firstClick = true;
 
-// JSON読み込み
-fetch('playlists.json')
-  .then(res => res.json())
-  .then(data => {
-    playlists = data;
+// DOMロード後にJSON読み込み
+document.addEventListener("DOMContentLoaded", () => {
+  fetch('playlists.json')
+    .then(res => res.json())
+    .then(data => {
+      playlists = data;
 
-    const select = document.getElementById('playlistSelect');
-    Object.keys(playlists).forEach(key => {
-      const option = document.createElement('option');
-      option.value = key;
-      option.textContent = playlists[key].label || key;
-      select.appendChild(option);
-    });
+      // セレクトボックス作成
+      const select = document.getElementById('playlistSelect');
+      Object.keys(playlists).forEach(key => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = playlists[key].label || key;
+        select.appendChild(option);
+      });
 
-    const firstKey = Object.keys(playlists)[0];
-    currentPlaylist = playlists[firstKey]?.videos ?? [];
-  })
-  .catch(err => console.error('JSON読み込みエラー:', err));
+      const firstKey = Object.keys(playlists)[0];
+      currentPlaylist = playlists[firstKey]?.videos ?? [];
+
+      // API準備確認
+      if (window.YT && YT.Player) {
+        createEmptyPlayer();
+        renderPlaylistList();
+      } else {
+        window.onYouTubeIframeAPIReady = () => {
+          createEmptyPlayer();
+          renderPlaylistList();
+        };
+      }
+    })
+    .catch(err => console.error('JSON読み込みエラー:', err));
+});
 
 // プレイリスト切替
 document.getElementById('playlistSelect').addEventListener('change', e => {
@@ -71,12 +85,6 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   createEmptyPlayer();
   renderPlaylistList();
 });
-
-// YouTube API準備完了
-function onYouTubeIframeAPIReady() {
-  createEmptyPlayer();
-  renderPlaylistList();
-}
 
 // 空プレイヤー生成
 function createEmptyPlayer() {
@@ -101,15 +109,15 @@ function loadVideo(index) {
   const playerDiv = document.getElementById('player');
 
   if (firstClick) {
-    playerDiv.style.display = 'block'; // 表示
-    setTimeout(() => { // レンダリング待ち
+    playerDiv.style.display = 'block';
+    setTimeout(() => {
       player.loadVideoById({
         videoId: video.videoId,
         startSeconds: video.start ?? 0,
         endSeconds: video.end ?? undefined
       });
       player.playVideo();
-    }, 50);
+    }, 50); // レンダリング確定待ち
     firstClick = false;
   } else {
     player.loadVideoById({
@@ -123,7 +131,7 @@ function loadVideo(index) {
   renderPlaylistList();
 }
 
-// プレイリストリスト描画
+// プレイリスト描画
 function renderPlaylistList() {
   const container = document.getElementById('playlistList');
   container.innerHTML = '';
