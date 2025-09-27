@@ -11,7 +11,7 @@
 
 <div class="player-wrapper">
 
-  <!-- プレイヤーを初期非表示 -->
+  <!-- 初期は非表示 -->
   <div class="video-container" id="videoContainer" style="display:none;">
     <div id="player"></div>
   </div>
@@ -43,6 +43,7 @@ fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
+
     const select = document.getElementById('playlistSelect');
     Object.keys(playlists).forEach(key => {
       const option = document.createElement('option');
@@ -65,35 +66,37 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   document.getElementById('musicTitle').textContent = '';
   document.getElementById('gameTitle').textContent = '';
 
-  // 既存プレイヤー破棄
+  // 再生停止＋破棄
   if (player) {
+    try { player.stopVideo(); } catch {}
     player.destroy();
     player = null;
     playerReady = false;
   }
-  document.getElementById('player').innerHTML = '';
+
+  // DOMリセット
+  const playerContainer = document.getElementById('player');
+  playerContainer.innerHTML = '';
   document.getElementById('videoContainer').style.display = 'none';
 
-  // 再度透明な空プレイヤーを準備
+  // 空プレイヤー再生成
   prepareEmptyPlayer();
 
   renderPlaylistList();
 });
 
-// 空プレイヤー生成関数
+// 空プレイヤー生成
 function prepareEmptyPlayer() {
   player = new YT.Player('player', {
     videoId: '', // 空
     playerVars: { controls: 1 },
     events: {
-      onReady: () => {
-        playerReady = true;
-      }
+      onReady: () => { playerReady = true; }
     }
   });
 }
 
-// 初回ページロード時も準備
+// 初回ロード時
 function onYouTubeIframeAPIReady() {
   prepareEmptyPlayer();
 }
@@ -111,7 +114,7 @@ function loadVideo(index) {
   const container = document.getElementById('videoContainer');
   if (container.style.display === 'none') container.style.display = 'block';
 
-  // プレイヤー準備完了まで待つ
+  // プレイヤー準備完了まで待機して再生
   const play = () => {
     if (!playerReady) {
       setTimeout(play, 100);
@@ -124,7 +127,6 @@ function loadVideo(index) {
     });
     player.playVideo();
   };
-
   play();
 
   renderPlaylistList();
