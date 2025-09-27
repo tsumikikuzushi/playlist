@@ -11,7 +11,8 @@
 
 <div class="player-wrapper">
 
-  <div class="video-container">
+  <!-- プレイヤーを初期非表示 -->
+  <div class="video-container" id="videoContainer" style="display:none;">
     <div id="player"></div>
   </div>
 
@@ -33,7 +34,7 @@
 <script>
 let playlists = {};
 let currentPlaylist = [];
-let currentIndex = -1; // 選択なし
+let currentIndex = -1; 
 let player;
 
 // JSON読み込み
@@ -42,7 +43,6 @@ fetch('playlists.json')
   .then(data => {
     playlists = data;
 
-    // セレクトボックスに追加
     const select = document.getElementById('playlistSelect');
     Object.keys(playlists).forEach(key => {
       const option = document.createElement('option');
@@ -51,7 +51,6 @@ fetch('playlists.json')
       select.appendChild(option);
     });
 
-    // 初期プレイリスト設定（動画ロードなし）
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
     renderPlaylistList();
@@ -66,56 +65,42 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   document.getElementById('musicTitle').textContent = '';
   document.getElementById('gameTitle').textContent = '';
 
-  // 既存プレイヤー破棄 + DOMリセット
-  if (player) {
-    player.destroy();
-    player = null;
-  }
-  document.getElementById('player').innerHTML = '';
-
   renderPlaylistList();
 });
 
-// YouTube API準備完了（初回は何もしない）
-function onYouTubeIframeAPIReady() {}
+// YouTube API準備完了：空プレイヤー生成
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    videoId: '', // 空
+    playerVars: {
+      controls: 1
+    }
+  });
+}
 
-// 動画ロード + タイトル更新
+// 動画ロード + タイトル更新 + 再生
 function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
 
   currentIndex = index;
 
-  // タイトル更新
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
-  // プレイヤー生成 or 動画切替
-  if (!player) {
-    // 初回生成：クリック直下で実行
-    player = new YT.Player('player', {
-      videoId: video.videoId,
-      playerVars: {
-        autoplay: 1, // クリック直下なので確実に再生される
-        controls: 1,
-        start: video.start ?? 0,
-        end: video.end ?? undefined
-      },
-      events: {
-        onReady: e => {
-          e.target.playVideo(); // 念のため
-        }
-      }
-    });
-  } else {
-    // 既存プレイヤーで動画切替：クリック直下なので再生可能
-    player.loadVideoById({
-      videoId: video.videoId,
-      startSeconds: video.start ?? 0,
-      endSeconds: video.end ?? undefined
-    });
-    player.playVideo();
+  // プレイヤー表示
+  const container = document.getElementById('videoContainer');
+  if (container.style.display === 'none') {
+    container.style.display = 'block';
   }
+
+  // 動画切替 + 再生
+  player.loadVideoById({
+    videoId: video.videoId,
+    startSeconds: video.start ?? 0,
+    endSeconds: video.end ?? undefined
+  });
+  player.playVideo();
 
   renderPlaylistList();
 }
@@ -132,7 +117,7 @@ function renderPlaylistList() {
                         <div class="musicTitle">${video.musicTitle}</div>
                         <div class="gameTitle">${video.gameTitle}</div>
                       </div>`;
-    item.addEventListener('click', () => loadVideo(idx)); // ← クリック操作で確実に再生
+    item.addEventListener('click', () => loadVideo(idx));
     container.appendChild(item);
   });
 }
