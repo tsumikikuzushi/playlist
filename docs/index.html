@@ -84,6 +84,9 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   firstClick = true;
   createEmptyPlayer();
   renderPlaylistList();
+
+  // スクロールを一番上に戻す
+  document.getElementById('playlistList').scrollTop = 0;
 });
 
 // 空プレイヤー生成
