@@ -17,13 +17,14 @@ body, html {
 .video-container {
   position: relative;
   width: 100%;
+  min-height: 360px; /* 空プレイヤー非表示でもリストがずれないように */
 }
 
 /* 空プレイヤー・動画プレイヤー共通 */
 #player {
   width: 100%;
-  aspect-ratio: 16/9; /* 16:9の比率を自動維持 */
-  display: none;       /* 初回クリックまで非表示 */
+  aspect-ratio: 16/9;
+  display: none; /* 初回クリックまで非表示 */
   background: black;
   border-radius: 6px;
 }
