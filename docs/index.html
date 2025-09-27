@@ -34,15 +34,15 @@
 <script>
 let playlists = {};
 let currentPlaylist = [];
-let currentIndex = -1; 
+let currentIndex = -1;
 let player;
+let playerReady = false;
 
 // JSON読み込み
 fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
-
     const select = document.getElementById('playlistSelect');
     Object.keys(playlists).forEach(key => {
       const option = document.createElement('option');
@@ -57,7 +57,7 @@ fetch('playlists.json')
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
-// プレイリスト切替時
+// プレイリスト切替
 document.getElementById('playlistSelect').addEventListener('change', e => {
   const key = e.target.value;
   currentPlaylist = playlists[key].videos;
@@ -65,17 +65,37 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   document.getElementById('musicTitle').textContent = '';
   document.getElementById('gameTitle').textContent = '';
 
+  // 既存プレイヤー破棄
+  if (player) {
+    player.destroy();
+    player = null;
+    playerReady = false;
+  }
+  document.getElementById('player').innerHTML = '';
+  document.getElementById('videoContainer').style.display = 'none';
+
+  // 再度透明な空プレイヤーを準備
+  prepareEmptyPlayer();
+
   renderPlaylistList();
 });
 
-// YouTube API準備完了：空プレイヤー生成
-function onYouTubeIframeAPIReady() {
+// 空プレイヤー生成関数
+function prepareEmptyPlayer() {
   player = new YT.Player('player', {
     videoId: '', // 空
-    playerVars: {
-      controls: 1
+    playerVars: { controls: 1 },
+    events: {
+      onReady: () => {
+        playerReady = true;
+      }
     }
   });
+}
+
+// 初回ページロード時も準備
+function onYouTubeIframeAPIReady() {
+  prepareEmptyPlayer();
 }
 
 // 動画ロード + タイトル更新 + 再生
@@ -84,23 +104,28 @@ function loadVideo(index) {
   if (!video) return;
 
   currentIndex = index;
-
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
   // プレイヤー表示
   const container = document.getElementById('videoContainer');
-  if (container.style.display === 'none') {
-    container.style.display = 'block';
-  }
+  if (container.style.display === 'none') container.style.display = 'block';
 
-  // 動画切替 + 再生
-  player.loadVideoById({
-    videoId: video.videoId,
-    startSeconds: video.start ?? 0,
-    endSeconds: video.end ?? undefined
-  });
-  player.playVideo();
+  // プレイヤー準備完了まで待つ
+  const play = () => {
+    if (!playerReady) {
+      setTimeout(play, 100);
+      return;
+    }
+    player.loadVideoById({
+      videoId: video.videoId,
+      startSeconds: video.start ?? 0,
+      endSeconds: video.end ?? undefined
+    });
+    player.playVideo();
+  };
+
+  play();
 
   renderPlaylistList();
 }
