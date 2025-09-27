@@ -8,14 +8,10 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div class="player-wrapper">
-
-  <!-- 初期は非表示 -->
-  <div class="video-container" id="videoContainer" style="display:none;">
+  <div class="video-container">
     <div id="player"></div>
   </div>
-
   <div class="title-container">
     <div class="musicTitle" id="musicTitle"></div>
     <div class="gameTitle" id="gameTitle"></div>
@@ -28,7 +24,6 @@
   </div>
 
   <div class="playlist-list" id="playlistList"></div>
-
 </div>
 
 <script>
@@ -36,14 +31,13 @@ let playlists = {};
 let currentPlaylist = [];
 let currentIndex = -1;
 let player;
-let playerReady = false;
+let firstClick = true;
 
 // JSON読み込み
 fetch('playlists.json')
   .then(res => res.json())
   .then(data => {
     playlists = data;
-
     const select = document.getElementById('playlistSelect');
     Object.keys(playlists).forEach(key => {
       const option = document.createElement('option');
@@ -54,6 +48,8 @@ fetch('playlists.json')
 
     const firstKey = Object.keys(playlists)[0];
     currentPlaylist = playlists[firstKey].videos;
+
+    createEmptyPlayer(); // 空プレイヤー生成（非表示）
     renderPlaylistList();
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
@@ -66,42 +62,36 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   document.getElementById('musicTitle').textContent = '';
   document.getElementById('gameTitle').textContent = '';
 
-  // 再生停止＋破棄
   if (player) {
-    try { player.stopVideo(); } catch {}
+    player.stopVideo();
     player.destroy();
     player = null;
-    playerReady = false;
   }
 
-  // DOMリセット
-  const playerContainer = document.getElementById('player');
-  playerContainer.innerHTML = '';
-  document.getElementById('videoContainer').style.display = 'none';
-
-  // 空プレイヤー再生成
-  prepareEmptyPlayer();
-
+  document.getElementById('player').innerHTML = '';
+  createEmptyPlayer();
+  firstClick = true;
   renderPlaylistList();
 });
 
-// 空プレイヤー生成
-function prepareEmptyPlayer() {
+// YouTube API準備完了
+function onYouTubeIframeAPIReady() {}
+
+// 空プレイヤー生成（非表示）
+function createEmptyPlayer() {
+  const playerDiv = document.getElementById('player');
+  playerDiv.style.display = 'none';
   player = new YT.Player('player', {
-    videoId: '', // 空
-    playerVars: { controls: 1 },
-    events: {
-      onReady: () => { playerReady = true; }
+    width: '100%',
+    videoId: '',
+    playerVars: {
+      autoplay: 0,
+      controls: 1
     }
   });
 }
 
-// 初回ロード時
-function onYouTubeIframeAPIReady() {
-  prepareEmptyPlayer();
-}
-
-// 動画ロード + タイトル更新 + 再生
+// 動画ロード + 初回クリックで表示 + 再生
 function loadVideo(index) {
   const video = currentPlaylist[index];
   if (!video) return;
@@ -110,24 +100,24 @@ function loadVideo(index) {
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
-  // プレイヤー表示
-  const container = document.getElementById('videoContainer');
-  if (container.style.display === 'none') container.style.display = 'block';
-
-  // プレイヤー準備完了まで待機して再生
-  const play = () => {
-    if (!playerReady) {
-      setTimeout(play, 100);
-      return;
-    }
+  const playerDiv = document.getElementById('player');
+  if (firstClick) {
+    playerDiv.style.display = 'block'; // 初回クリックで表示
     player.loadVideoById({
       videoId: video.videoId,
       startSeconds: video.start ?? 0,
       endSeconds: video.end ?? undefined
     });
     player.playVideo();
-  };
-  play();
+    firstClick = false;
+  } else {
+    player.loadVideoById({
+      videoId: video.videoId,
+      startSeconds: video.start ?? 0,
+      endSeconds: video.end ?? undefined
+    });
+    player.playVideo();
+  }
 
   renderPlaylistList();
 }
@@ -139,16 +129,17 @@ function renderPlaylistList() {
   currentPlaylist.forEach((video, idx) => {
     const item = document.createElement('div');
     item.className = 'playlist-item' + (idx === currentIndex && currentIndex >= 0 ? ' selected' : '');
-    item.innerHTML = `<img src="${video.thumbnail}" alt="${video.musicTitle}">
-                      <div class="titles">
-                        <div class="musicTitle">${video.musicTitle}</div>
-                        <div class="gameTitle">${video.gameTitle}</div>
-                      </div>`;
+    item.innerHTML = `
+      <img src="${video.thumbnail}" alt="${video.musicTitle}">
+      <div class="titles">
+        <div class="musicTitle">${video.musicTitle}</div>
+        <div class="gameTitle">${video.gameTitle}</div>
+      </div>
+    `;
     item.addEventListener('click', () => loadVideo(idx));
     container.appendChild(item);
   });
 }
 </script>
-
 </body>
 </html>
