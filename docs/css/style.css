@@ -6,7 +6,6 @@ body, html {
   font-family: sans-serif;
 }
 
-/* プレイヤー中央寄せ */
 .player-wrapper {
   max-width: 600px;
   margin: 0 auto;
@@ -14,12 +13,13 @@ body, html {
   text-align: center;
 }
 
-/* プレイヤー */
+/* プレイヤー：レスポンシブ */
 .video-container {
   position: relative;
   width: 100%;
   padding-top: 56.25%; /* 16:9比率 */
   margin: 0 auto;
+  display: none; /* 初期非表示 */
 }
 #player {
   position: absolute;
@@ -29,7 +29,6 @@ body, html {
   height: 100%;
 }
 
-/* タイトル表示 */
 .title-container {
   margin-top: 1rem;
 }
@@ -44,7 +43,6 @@ body, html {
   margin-top: 0.2rem;
 }
 
-/* プレイリスト切替 */
 .playlist-selector {
   margin-top: 1.5rem;
   text-align: center;
@@ -63,11 +61,10 @@ body, html {
   cursor: pointer;
 }
 
-/* プレイリスト表示 */
 .playlist-list {
   margin-top: 2rem;
-  max-height: 200px;   /* スクロール領域の高さ */
-  overflow-y: auto;    /* 縦スクロール有効化 */
+  max-height: 200px;
+  overflow-y: auto;
   padding-right: 5px;
   text-align: left;
 }
