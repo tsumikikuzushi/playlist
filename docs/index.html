@@ -86,33 +86,35 @@ function loadVideo(index) {
 
   currentIndex = index;
 
+  // タイトル更新
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
-  // プレイヤー未生成 or プレイリスト切替直後
+  // プレイヤー生成 or 動画切替
   if (!player) {
+    // 初回生成：クリック直下で実行
     player = new YT.Player('player', {
       videoId: video.videoId,
       playerVars: {
-        autoplay: 1, // ← ここが重要！
+        autoplay: 1, // クリック直下なので確実に再生される
         controls: 1,
         start: video.start ?? 0,
         end: video.end ?? undefined
       },
       events: {
         onReady: e => {
-          // onReadyでplayVideoは不要
+          e.target.playVideo(); // 念のため
         }
       }
     });
   } else {
-    // 既存プレイヤーで動画切替
+    // 既存プレイヤーで動画切替：クリック直下なので再生可能
     player.loadVideoById({
       videoId: video.videoId,
       startSeconds: video.start ?? 0,
       endSeconds: video.end ?? undefined
     });
-    player.playVideo(); // ← これはクリック直下なのでOK
+    player.playVideo();
   }
 
   renderPlaylistList();
