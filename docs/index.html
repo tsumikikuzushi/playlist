@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>私選ゲームBGMプレイヤー</title>
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>私選ゲームBGMプレイヤー</title>
+<script src="https://www.youtube.com/iframe_api"></script>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="player-wrapper">
   <div class="video-container">
     <div id="player"></div>
   </div>
+
   <div class="title-container">
     <div class="musicTitle" id="musicTitle"></div>
     <div class="gameTitle" id="gameTitle"></div>
   </div>
 
-  <!-- プレイリスト切替セレクター -->
   <div class="playlist-selector">
     <label for="playlistSelect">プレイリスト切替：</label>
     <select id="playlistSelect"></select>
@@ -74,11 +74,11 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
 
 // YouTube API準備完了
 function onYouTubeIframeAPIReady() {
-  createEmptyPlayer(); // API準備完了後に空プレイヤー生成
+  createEmptyPlayer();
   renderPlaylistList();
 }
 
-// 空プレイヤー生成（非表示）
+// 空プレイヤー生成
 function createEmptyPlayer() {
   const playerDiv = document.getElementById('player');
   playerDiv.style.display = 'none';
@@ -99,14 +99,17 @@ function loadVideo(index) {
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
   const playerDiv = document.getElementById('player');
+
   if (firstClick) {
-    playerDiv.style.display = 'block'; // 初回クリックで表示
-    player.loadVideoById({
-      videoId: video.videoId,
-      startSeconds: video.start ?? 0,
-      endSeconds: video.end ?? undefined
-    });
-    player.playVideo();
+    playerDiv.style.display = 'block'; // 表示
+    setTimeout(() => { // レンダリング待ち
+      player.loadVideoById({
+        videoId: video.videoId,
+        startSeconds: video.start ?? 0,
+        endSeconds: video.end ?? undefined
+      });
+      player.playVideo();
+    }, 50);
     firstClick = false;
   } else {
     player.loadVideoById({
@@ -120,7 +123,7 @@ function loadVideo(index) {
   renderPlaylistList();
 }
 
-// プレイリストリストレンダリング
+// プレイリストリスト描画
 function renderPlaylistList() {
   const container = document.getElementById('playlistList');
   container.innerHTML = '';
