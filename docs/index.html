@@ -89,20 +89,19 @@ function loadVideo(index) {
   document.getElementById('musicTitle').textContent = video.musicTitle;
   document.getElementById('gameTitle').textContent = video.gameTitle;
 
+  // プレイヤー未生成 or プレイリスト切替直後
   if (!player) {
-    // プレイヤー未生成 → ユーザー操作中に生成
     player = new YT.Player('player', {
       videoId: video.videoId,
-      playerVars: { autoplay: 0, controls: 1 },
+      playerVars: {
+        autoplay: 1, // ← ここが重要！
+        controls: 1,
+        start: video.start ?? 0,
+        end: video.end ?? undefined
+      },
       events: {
         onReady: e => {
-          // 生成直後に動画をロード
-          e.target.loadVideoById({
-            videoId: video.videoId,
-            startSeconds: video.start ?? 0,
-            endSeconds: video.end ?? undefined
-          });
-          e.target.playVideo(); // ← ユーザークリック内なのでスマホでも再生される
+          // onReadyでplayVideoは不要
         }
       }
     });
@@ -113,7 +112,7 @@ function loadVideo(index) {
       startSeconds: video.start ?? 0,
       endSeconds: video.end ?? undefined
     });
-    player.playVideo(); // ← クリック内で呼ぶことでスマホも再生OK
+    player.playVideo(); // ← これはクリック直下なのでOK
   }
 
   renderPlaylistList();
