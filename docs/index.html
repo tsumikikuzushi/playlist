@@ -48,10 +48,7 @@ fetch('playlists.json')
     });
 
     const firstKey = Object.keys(playlists)[0];
-    currentPlaylist = playlists[firstKey]?.videos ?? []; // 空配列安全確保
-
-    createEmptyPlayer(); // 空プレイヤー生成
-    renderPlaylistList(); // JSONロード後に必ずリスト描画
+    currentPlaylist = playlists[firstKey]?.videos ?? [];
   })
   .catch(err => console.error('JSON読み込みエラー:', err));
 
@@ -70,13 +67,16 @@ document.getElementById('playlistSelect').addEventListener('change', e => {
   }
 
   document.getElementById('player').innerHTML = '';
-  createEmptyPlayer();
   firstClick = true;
+  createEmptyPlayer();
   renderPlaylistList();
 });
 
 // YouTube API準備完了
-function onYouTubeIframeAPIReady() {}
+function onYouTubeIframeAPIReady() {
+  createEmptyPlayer(); // API準備完了後に空プレイヤー生成
+  renderPlaylistList();
+}
 
 // 空プレイヤー生成（非表示）
 function createEmptyPlayer() {
